@@ -1,37 +1,53 @@
+/*
+ * @Descripttion: 
+ * @Version: 1.0
+ * @Author: szhangbiao
+ * @Date: 2022-07-09 17:07:58
+ * @LastEditors: szhangbiao
+ * @LastEditTime: 2022-07-11 12:58:14
+ */
+import React from 'react';
 import styles from './App.module.scss';
-import { Link,Route } from 'react-router-dom';
+import { Link, Routes, Route, useLocation } from 'react-router-dom';
 import HomePage from './HomePage';
 import WorkPage from './WorkPage';
 import WorkPageDetail from './WorkPageDetail';
 
-function App() {
-  return (
-    <div className={styles.App}>
-        {/* 头部导航 */}
-        <header className={styles.header}>
-          <div className={styles.box}>
-            <Link to="/"><div className={styles.boxLeft}>VauxLab</div></Link>
-            <div className={styles.boxRight}>
-              <Link to="/"><p>HOME</p></Link>
-              <Link to="/works"><p>WORKS</p></Link>
-            </div>
-          </div>
-        </header>
+function App () {
+    const location = useLocation();
+    console.log('hash', location.hash);
+    console.log('pathname', location.pathname);
+    console.log('search', location.search);
+    return (
+        <div className={styles.App}>
 
-        {/* 内容区 */}
-        <section className={styles.content}>
-          <Route path="/" exact component={ HomePage } />
-          <Route path="/works" exact component={ WorkPage } />
-          <Route path="/works/:id" exact component={ WorkPageDetail } />
-        </section>
+            {/* 头部导航 */}
+            <header className={styles.header}>
+                <div className={styles.box}>
+                    <Link to="/"><div className={styles.boxLeft}>VauxLab</div></Link>
+                    <div className={styles.boxRight}>
+                        <Link to="/"><p className={location.pathname === "/" ? styles.selected : null}>HOME</p></Link>
+                        <Link to="/works"><p className={location.pathname === "/works" ? styles.selected : null}>WORKS</p></Link>
+                    </div>
+                </div>
+            </header>
 
-        {/* 底部 */}
-        <footer className={styles.footer}>
-          <p>© <b>2022 Thijs Koerselman</b></p>
-          <p>Handmade with</p>
-        </footer>
-    </div>
-  );
+            {/* 内容区 */}
+            <section className={styles.content}>
+                <Routes>
+                    <Route path="/" exact element={<HomePage />} />
+                    <Route path="/works" exact element={<WorkPage />} />
+                    <Route path="/works/:id" exact element={<WorkPageDetail />} />
+                </Routes>
+            </section>
+
+            {/* 底部 */}
+            <footer className={styles.footer}>
+                <p>© <b>2022 Thijs Koerselman</b></p>
+                <p>Handmade with</p>
+            </footer>
+        </div>
+    );
 }
 
 export default App;
