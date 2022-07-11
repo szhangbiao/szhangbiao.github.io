@@ -4,7 +4,7 @@
  * @Author: szhangbiao
  * @Date: 2022-07-10 11:20:26
  * @LastEditors: szhangbiao
- * @LastEditTime: 2022-07-11 13:55:40
+ * @LastEditTime: 2022-07-11 14:07:04
  */
 
 import React from 'react';
@@ -17,7 +17,7 @@ export default () => {
     return <div className={styles.wrap}>
         {/* 个人简介 */}
         <section className={styles.brief}>
-            <img src={require("../../assets/avatar.jpg")} />
+            <img src={require("../../assets/avatar.jpg")} alt="Person Avatar" />
             <h2>Szhangbiao</h2>
             <ul>
                 <li>software engineer</li>
