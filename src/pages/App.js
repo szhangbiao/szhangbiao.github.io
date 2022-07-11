@@ -4,7 +4,7 @@
  * @Author: szhangbiao
  * @Date: 2022-07-09 17:07:58
  * @LastEditors: szhangbiao
- * @LastEditTime: 2022-07-11 12:58:14
+ * @LastEditTime: 2022-07-11 13:50:55
  */
 import React from 'react';
 import styles from './App.module.scss';
@@ -43,8 +43,8 @@ function App () {
 
             {/* 底部 */}
             <footer className={styles.footer}>
-                <p>© <b>2022 Thijs Koerselman</b></p>
-                <p>Handmade with</p>
+                <p>© <b>2022 szhangbiao</b></p>
+                <p>Practice with</p>
             </footer>
         </div>
     );

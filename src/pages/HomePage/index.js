@@ -4,7 +4,7 @@
  * @Author: szhangbiao
  * @Date: 2022-07-10 11:20:26
  * @LastEditors: szhangbiao
- * @LastEditTime: 2022-07-11 11:18:50
+ * @LastEditTime: 2022-07-11 13:55:40
  */
 
 import React from 'react';
@@ -26,7 +26,7 @@ export default () => {
             </ul>
             <p>I design applications, interactive systems and websites. I love using technology in creative contexts.</p>
             <p>I am a freelancer based in Utrecht, the Netherlands.</p>
-            <p>Contact me at thijs@vauxlab.com</p>
+            <p>Contact me at szhangbiao@gmail.com</p>
         </section>
 
         {/* 个人简介 */}
