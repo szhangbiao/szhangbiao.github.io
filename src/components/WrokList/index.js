@@ -4,7 +4,7 @@
  * @Author: szhangbiao
  * @Date: 2022-07-11 11:09:34
  * @LastEditors: szhangbiao
- * @LastEditTime: 2022-07-11 13:46:59
+ * @LastEditTime: 2022-07-11 14:07:43
  */
 
 import React from 'react';
@@ -20,7 +20,7 @@ export default ({ dataSource }) => {
                     <li key={item.id}>
                         <Link to={`/works/${item.id}`}>
                             <div className={styles.cover}>
-                                <img src={item.cover} />
+                                <img src={item.cover} alt="" />
                             </div>
                             <div className={styles.workbrief}>
                                 <h3>{item.title}</h3>
