@@ -12,10 +12,10 @@ jobs:
             - uses: actions/checkout@main
 
             # 安装依赖
-            - run: npm ci
+            #- run: npm ci
 
             # 打包
-            - run: npm run build
+            #- run: npm run build
 
             # 部署
             - name: Deploy
