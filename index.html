@@ -198,7 +198,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -255,7 +256,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -312,7 +314,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -378,24 +381,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h4 id="创建-jacoco-gradle-文件"><a href="#创建-jacoco-gradle-文件" class="headerlink" title="创建 jacoco.gradle 文件"></a>创建 jacoco.gradle 文件</h4><p>首先在项目根目录创建<code>script</code>文件夹，然后 jacoco.gradle 如下：</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;jacoco&#x27;</span></span><br><span class="line"></span><br><span class="line">tasks.withType(Test) &#123;</span><br><span class="line">    jacoco &#123;</span><br><span class="line">        includeNoLocationClasses = <span class="literal">true</span></span><br><span class="line">        excludes = [<span class="string">&#x27;jdk.internal.*&#x27;</span>] <span class="comment">// Allows it to run on Java 11</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    testCoverage &#123;</span><br><span class="line">        jacocoVersion <span class="string">&quot;0.8.10&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            testCoverageEnabled <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 根据你productFlavor和buildType定义</span></span><br><span class="line"><span class="keyword">def</span> sourceName = <span class="string">&#x27;devDebug&#x27;</span></span><br><span class="line"><span class="keyword">def</span> testTaskName = <span class="string">&quot;test$&#123;sourceName.capitalize()&#125;UnitTest&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果需要统计androidTest的覆盖率，需要把createDevDebugCoverageReport这个task加到dependsOn里</span></span><br><span class="line"><span class="comment">// createDevDebugCoverageReport - this task for generate androidTest report, that need connect a devices</span></span><br><span class="line">task jacocoTestReport(<span class="attr">type:</span> JacocoReport, <span class="attr">dependsOn:</span> [<span class="string">&#x27;testDevDebugUnitTest&#x27;</span>]) &#123;</span><br><span class="line">    group = <span class="string">&quot;JacocoReport&quot;</span></span><br><span class="line">    description = <span class="string">&quot;Generate Jacoco coverage reports on the $&#123;sourceName.capitalize()&#125; build.&quot;</span></span><br><span class="line"></span><br><span class="line">    reports &#123;</span><br><span class="line">        xml.getRequired().set(<span class="literal">true</span>)</span><br><span class="line">        csv.getRequired().set(<span class="literal">false</span>)</span><br><span class="line">        html.getRequired().set(<span class="literal">true</span>)</span><br><span class="line">        <span class="comment">// 这里重新定义jacoco生成的报告的位置</span></span><br><span class="line">        <span class="comment">//to create coverage report in html</span></span><br><span class="line">        html.outputLocation.set(file(<span class="string">&quot;$&#123;buildDir&#125;/reports/coverage&quot;</span>))</span><br><span class="line">        <span class="comment">//for XML</span></span><br><span class="line">        xml.outputLocation.set(file(<span class="string">&quot;$&#123;buildDir&#125;/reports/jacoco.xml&quot;</span>))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> fileFilter = [</span><br><span class="line">            <span class="comment">// adapters generated by moshi</span></span><br><span class="line">            <span class="string">&#x27;**/*JsonAdapter.*&#x27;</span>,</span><br><span class="line">            <span class="comment">//dao dir generated by room</span></span><br><span class="line">            <span class="string">&#x27;**/dao/**&#x27;</span>,</span><br><span class="line">            <span class="comment">// Injector generated by hilt</span></span><br><span class="line">            <span class="string">&#x27;**/*GeneratedInjector.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*EntryPoint.*&#x27;</span>,</span><br><span class="line">            <span class="comment">// data binding</span></span><br><span class="line">            <span class="string">&#x27;**/databinding/**/*.class&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/databinding/*Binding.class&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/databinding/*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/bumptech/*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/BR.*&#x27;</span>,</span><br><span class="line">            <span class="comment">// android</span></span><br><span class="line">            <span class="string">&#x27;**/R.class&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/R$*.class&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/BuildConfig.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/Manifest*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*Test*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;android/**/*.*&#x27;</span>,</span><br><span class="line">            <span class="comment">// kotlin</span></span><br><span class="line">            <span class="string">&#x27;**/*MapperImpl*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*$ViewInjector*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*$ViewBinder*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/BuildConfig.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*Component*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*BR*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/Manifest*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*$Lambda$*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*Companion*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*Module*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*Dagger*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*Hilt*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*MembersInjector*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*_MembersInjector.class&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*_Factory*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*_Provide*Factory*.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*Extensions*.*&#x27;</span>,</span><br><span class="line">            <span class="comment">// sealed and data classes</span></span><br><span class="line">            <span class="string">&#x27;**/*$Result.*&#x27;</span>,</span><br><span class="line">            <span class="string">&#x27;**/*$Result$*.*&#x27;</span></span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> javaClasses = []</span><br><span class="line">    <span class="keyword">def</span> kotlinClasses = []</span><br><span class="line">    <span class="keyword">def</span> javaSrc = []</span><br><span class="line"></span><br><span class="line">    rootProject.subprojects.each &#123; proj -&gt;</span><br><span class="line">        <span class="comment">// ignore app project that contain many deprecated code</span></span><br><span class="line">        <span class="keyword">if</span> (proj.name != <span class="string">&#x27;app&#x27;</span>) &#123;</span><br><span class="line">            javaClasses &lt;&lt; fileTree(<span class="attr">dir:</span> <span class="string">&quot;$proj.buildDir/intermediates/javac/$sourceName/classes&quot;</span>, <span class="attr">excludes:</span> fileFilter)</span><br><span class="line">            kotlinClasses &lt;&lt; fileTree(<span class="attr">dir:</span> <span class="string">&quot;$proj.buildDir/tmp/kotlin-classes/$sourceName&quot;</span>, <span class="attr">excludes:</span> fileFilter)</span><br><span class="line">            javaSrc &lt;&lt; <span class="string">&quot;$proj.projectDir/src/main/java&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sourceDirectories.from = files([javaSrc])</span><br><span class="line">    classDirectories.from = files([javaClasses, kotlinClasses])</span><br><span class="line">    <span class="comment">// 这里注意定义executionData的文件夹位置</span></span><br><span class="line">    <span class="keyword">def</span> executionDir = <span class="string">&quot;$&#123;project.buildDir&#125;/outputs/unit_test_code_coverage/$&#123;sourceName&#125;UnitTest/$&#123;testTaskName&#125;.exec&quot;</span></span><br><span class="line">    executionData.from = files(executionDir)</span><br><span class="line">    print(<span class="string">&quot;executionData Dir:$executionDir&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>由于最新版 Android Studio 生成<code>.exec</code>文件的位置不再是<code>build/jacoco</code>，所以这里要定义具体生成<code>.exec</code>文件的位置。而是会放在 <code>app/build/outputs/unit_test_code_coverage/</code>目录下。</p>
-<h4 id="添加-Jacoco-相关配置"><a href="#添加-Jacoco-相关配置" class="headerlink" title="添加 Jacoco 相关配置"></a>添加 Jacoco 相关配置</h4><p>首先 classpath</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">classpath(&#x27;org.jacoco:org.jacoco.core:0.8.10&#x27;)</span><br></pre></td></tr></table></figure>
-
-<p>然后在<code>app</code>下的 gradle 加入</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apply(<span class="string">&quot;$&#123;project.rootDir&#125;/script/jacoco.gradle&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>在每一个非 Application 的 gradle 下加入</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id(<span class="string">&quot;com.android.library&quot;</span>)</span><br><span class="line">    id(<span class="string">&quot;jacoco&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            isTestCoverageEnabled = <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="命令行得到代码覆盖率统计报告"><a href="#命令行得到代码覆盖率统计报告" class="headerlink" title="命令行得到代码覆盖率统计报告"></a>命令行得到代码覆盖率统计报告</h4><p>待工程<code>Sync</code>完成以后就可以运行一下 Command 得到测试代码覆盖率的报告</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gradlew app:jacocoTestReport</span><br></pre></td></tr></table></figure>
-
-<p>最后查看 <code>app/build/reports/coverage/jacocoTestReport.xml</code>查看代码覆盖率报告</p>
-
+          <p>jacoco 是一款面向 java 的代码覆盖率分析工具，通过 ASM 字节码插桩技术，计算被测试代码覆盖的代码块，最后生成代码覆盖率报告。插桩方式分为在线（on the fly）和离线（offline）两种模式。其中在线模式在使用中更方便。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/05/30/unit-test-coverage-jacoco/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -452,7 +446,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -509,7 +504,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -566,7 +562,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -632,7 +629,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -689,7 +687,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -746,7 +745,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -843,7 +843,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

@@ -198,7 +198,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -255,7 +256,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -321,7 +323,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <p>TODO</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/09/10/income-app-refactor-road/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -378,7 +388,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -444,19 +455,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>这个项目是我司跟澳洲公司合作的一个足球体育类项目，他们为了解决每次发布应用时都要手动打包的痛点，决定引入 Bitrise 平台来自动化部署应用发布给 QA 或者生产环境。由于我之前有使用过 Bitrise 的经验，相关的一些任务也就交给我了，在完成一些配置正常使用过一段时间后，QA 提出了每次给到的 Apk 都是一样的 Name，在多个版本或平台的 apk 一起给到的情况下无法做区分，于是就有了这个任务给到我。</p>
-<h3 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h3><p>在拿到任务的第一时间，我首先想到的是在<code>build.gradle</code>中添加一个 rename 方法类似下面这种代码:</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> renameAPK(variant, defaultConfig, buildType) &#123;</span><br><span class="line">    variant.outputs.<span class="keyword">each</span> &#123; output -&gt;</span><br><span class="line">        <span class="keyword">def</span> formattedDate = <span class="keyword">new</span> Date().format(<span class="string">&#x27;yyMMdd&#x27;</span>)</span><br><span class="line">        <span class="keyword">def</span> <span class="keyword">file</span> = output.packageApplication.outputFile</span><br><span class="line">        <span class="keyword">def</span> fileName = applicationName + <span class="string">&quot;_V&quot;</span> + defaultConfig.versionCode + <span class="string">&quot;_&quot;</span> + formattedDate + <span class="string">&quot;_&quot;</span> + buildType + <span class="string">&quot;.apk&quot;</span></span><br><span class="line">        output.packageApplication.outputFile = <span class="keyword">new</span> <span class="keyword">File</span>(<span class="keyword">file</span>.parent, fileName)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是这个方案被 Leader 否决了，他觉得用 Bitrise 实现更好些，于是这个方案就放弃了。<br>在经过 Google 的一系列搜索，虽然没有直接找到解决方案，但是相应的找到了 iOS 在 Bitrise 上的一个实现：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="built_in">set</span> -ex</span><br><span class="line"></span><br><span class="line"><span class="comment"># config</span></span><br><span class="line">new_ipa_path=<span class="string">&quot;<span class="variable">$&#123;BITRISE_DEPLOY_DIR&#125;</span>/MyNewAppName-<span class="variable">$&#123;BITRISE_BUILD_NUMBER&#125;</span>.ipa&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># rename the ipa</span></span><br><span class="line"><span class="built_in">mv</span> <span class="string">&quot;<span class="variable">$BITRISE_IPA_PATH</span>&quot;</span> <span class="string">&quot;<span class="variable">$new_ipa_path</span>&quot;</span></span><br><span class="line"><span class="comment"># expose the new path/value as an env var, for the same key</span></span><br><span class="line"><span class="comment"># overwriting the previous value</span></span><br><span class="line">envman add --key BITRISE_IPA_PATH --value <span class="string">&quot;<span class="variable">$new_ipa_path</span>&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>这是在 Bitrise 的 Workflow 中产生 ipa 文件的 Step 后面加的一个 rename 脚本。<br>但是在 Android 的 Deploy 的 Workflow 中 <code>Generate Apk</code>的 step 并没有把 Apk 的 VersionName 和 VersionCode 保存到环境变量中，所以这里需要添加一个<code>Apk Info</code>的 step 来把这两个信息保存到环境变量中。</p>
-<h3 id="最终方案"><a href="#最终方案" class="headerlink" title="最终方案"></a>最终方案</h3><p>所以相应的 Android 端的解决方案就是：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="built_in">set</span> -ex</span><br><span class="line"><span class="comment"># ANDROID_APP_VERSION_NAME 和 ANDROID_APP_VERSION_CODE 是 Apk Info 的Step获取并set到环境变量中</span></span><br><span class="line"><span class="comment"># OUTPUT_APK_SUFFIX 是自定义在Env Vars中，对应不同的平台</span></span><br><span class="line">new_apk_path=<span class="string">&quot;<span class="variable">$&#123;BITRISE_DEPLOY_DIR&#125;</span>/V<span class="variable">$&#123;ANDROID_APP_VERSION_NAME&#125;</span>_<span class="variable">$&#123;ANDROID_APP_VERSION_CODE&#125;</span>_<span class="variable">$&#123;OUTPUT_APK_SUFFIX&#125;</span>.apk&quot;</span></span><br><span class="line"><span class="comment"># 由 Generate Apk 的 Gradle Runner 的Step运行后set到环境变量中</span></span><br><span class="line"><span class="comment"># rename the apk</span></span><br><span class="line"><span class="built_in">mv</span> <span class="string">&quot;<span class="variable">$BITRISE_APK_PATH</span>&quot;</span> <span class="string">&quot;<span class="variable">$new_apk_path</span>&quot;</span></span><br><span class="line"><span class="comment"># expose the new path/value as an env var, for the same key</span></span><br><span class="line"><span class="comment"># overwriting the previous value</span></span><br><span class="line">envman add --key BITRISE_APK_PATH --value <span class="string">&quot;<span class="variable">$new_apk_path</span>&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>至此，我便完成了这个任务。</p>
-
+          <p>Bitrise 是一个移动应用程序开发平台，使数以万计的开发人员能够自动化集成、测试和部署。通过与开发人员熟悉和喜爱的服务的 200 多个集成，Bitrise 使开发人员可以自由地迭代并改进了他们的工作流程，以获得更快、更好的结果。它提供了 300 个多个步骤和集成，以便轻松连接您在移动开发工作流程中使用的流程和服务。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/08/03/bitrise-deploy-android-format-apk/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -522,7 +529,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -588,7 +596,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -654,7 +663,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <p>TODO: 代码规范</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/24/code-rules-with-android/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -711,7 +728,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          
+          <span id="more"></span>
+
       
     </div>
 
@@ -769,19 +787,14 @@
 
       
           <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/06/22/getting-started-with-hexo/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -878,7 +891,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
