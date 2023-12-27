@@ -20,17 +20,19 @@
     var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="article">
+  <meta name="description" content="Config 工程化的灵感是来自于澳洲体育视频项目，他们的 Remote Config 工程化做的非常好，它分为两大类 Config 和 Storage，然后用 CircleCI 来自动化处理 Config 的更新和 Storage 的文件上传，是由运维人员来实现的，具体实现细节不是很清楚，所以这里我们来实现一个基于 Python 的 Config 工程化的案例。">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Firebase Remote Config的工程化案例">
 <meta property="og:url" content="https://szhangbiao.github.io/2023/05/25/firebase-remote-config-deploy/index.html">
 <meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="Config 工程化的灵感是来自于澳洲体育视频项目，他们的 Remote Config 工程化做的非常好，它分为两大类 Config 和 Storage，然后用 CircleCI 来自动化处理 Config 的更新和 Storage 的文件上传，是由运维人员来实现的，具体实现细节不是很清楚，所以这里我们来实现一个基于 Python 的 Config 工程化的案例。">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-05-25T15:04:49.000Z">
-<meta property="article:modified_time" content="2023-12-27T02:08:22.494Z">
+<meta property="article:modified_time" content="2023-12-27T07:24:50.647Z">
 <meta property="article:author" content="szhangbiao">
 <meta property="article:tag" content="Firebase">
-<meta property="article:tag" content="Remote Config">
-<meta property="article:tag" content="持续集成">
+<meta property="article:tag" content="Firebase Storage">
+<meta property="article:tag" content="Python">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="https://szhangbiao.github.io/2023/05/25/firebase-remote-config-deploy/">
@@ -197,7 +199,7 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CI-CD/" itemprop="url" rel="index"><span itemprop="name">CI/CD</span></a>
+                  <a href="/categories/Remote-Config/" itemprop="url" rel="index"><span itemprop="name">Remote Config</span></a>
                 </span>
             </span>
 
@@ -219,7 +221,37 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <span id="more"></span>
+        <p>Config 工程化的灵感是来自于澳洲体育视频项目，他们的 Remote Config 工程化做的非常好，它分为两大类 Config 和 Storage，然后用 CircleCI 来自动化处理 Config 的更新和 Storage 的文件上传，是由运维人员来实现的，具体实现细节不是很清楚，所以这里我们来实现一个基于 Python 的 Config 工程化的案例。</p>
+<span id="more"></span>
+
+<h4 id="最初方案"><a href="#最初方案" class="headerlink" title="最初方案"></a>最初方案</h4><p>经过一番搜索我们得到一个接近的方案，具体可参考 <a target="_blank" rel="noopener" href="https://gist.github.com/anshajk/2ac022116732d7e2c0b3f9a66a0841c4">这里</a>，链接里提供了三个文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd.yaml // 主要放在项目根目录下的 &quot;.github/workflows/&quot;下 用于当 git push 时自动发布</span><br><span class="line">config_manage.py // Python 可执行文件</span><br><span class="line">requirement.txt // 根据txt文件里的声明通过 pip 安装依赖</span><br></pre></td></tr></table></figure>
+
+<p>下面我们依次对这三个文件进行说明<br>cd.yaml:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Build阶段：</span><br><span class="line">1.安装Python，版本是 3.8</span><br><span class="line">2.把requirement.txt文件设置到缓存</span><br><span class="line">3.安装requirement.txt里声明的依赖</span><br><span class="line">发布阶段：</span><br><span class="line">需要Build阶段执行完后再执行</span><br><span class="line">1.安装Python，版本是 3.8</span><br><span class="line">2.安装requirement.txt里声明的依赖</span><br><span class="line">3.把PROJECT_ID和CREDENTIALS设置到环境变量并运行config_manage.py 的publish方法</span><br></pre></td></tr></table></figure>
+
+<p>config_manage.py：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_get_access_token</span>():</span><br><span class="line">    // 根据oauth2client库的api和环境变量里的凭证去获取 access token</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_get</span>(<span class="params">save=<span class="literal">False</span></span>):</span><br><span class="line">    // 通过requests库用access token获取Remote Config并写入本地config.json文件</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_listVersions</span>():</span><br><span class="line">    // 通过requests库用access token获取Remote Config最近修改的<span class="number">5</span>个版本号</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_rollback</span>(<span class="params">version</span>):</span><br><span class="line">    // 通过requests库用access token撤回Remote Config到指定版本</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_publish</span>():</span><br><span class="line">    // 把本地<span class="string">&quot;remoteconfig.template.json&quot;</span>的内容push到远程</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    //通过接受的参数执行相应的方法</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>requirement.txt：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">oauth2client // Google获取授权的python库</span><br><span class="line">requests // 用于进行Api请求</span><br><span class="line">python-dotenv // 用户获取系统变量里的值</span><br></pre></td></tr></table></figure>
+
+<p>这个方案并不能解决我们的实际需求，config_manage.py 里的方法相对比较单一，但是给了我们方向，增大了我们方案实现可行性</p>
+<h4 id="改造实现"><a href="#改造实现" class="headerlink" title="改造实现"></a>改造实现</h4><p>经过我们的改造，工程的目录结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">config-example</span><br><span class="line">├── .github</span><br><span class="line">│   └── workflows</span><br><span class="line">│       └── deploy.yaml  // Github Actions 配置文件</span><br><span class="line">├── remote_config</span><br><span class="line">│   └── configs.json // 各种Remote Config的json文件</span><br><span class="line">├── storage</span><br><span class="line">│   └── files  // 需要上传到Firebase Storage的文件</span><br><span class="line">├── remoteconfig.template.json</span><br><span class="line">├── config_manage.py</span><br><span class="line">└── requirement.txt</span><br></pre></td></tr></table></figure>
+
+<p>对于<code>config_manage.py</code>文件我们增加一个<code>validation()</code>方法并改造<code>publish()</code>以满足我们的需求<br>config_manage.py：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_validation</span>():</span><br><span class="line">    <span class="number">1.</span>调用_get()方法并把ETag缓存起来</span><br><span class="line">    <span class="number">2.</span>扫描remote_config目录，把多个json文件合并成符合Remote Config规则的remoteconfig.template.json文件</span><br><span class="line">    <span class="number">3.</span>使用requests库调用 validate api 来验证remoteconfig.template.json文件是否符合Remote Config规则</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_publish</span>():</span><br><span class="line">    <span class="number">1.</span>调用_validation()方法检查json文件</span><br><span class="line">    <span class="number">2.</span>使用requests库把<span class="string">&quot;remoteconfig.template.json&quot;</span>的内容push到远程</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    //通过接受的参数执行相应的方法</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>我们这里也修改了 deploy 的触发条件，改为<code>pull_request</code>的时候触发，也就是在<code>pull_request</code>时，会自动发布。</p>
+<h4 id="后续优化"><a href="#后续优化" class="headerlink" title="后续优化"></a>后续优化</h4><p>由于每次发布 config 都需要 PR，当一个人开发时还是比较繁琐，这里我们 copy 一份<code>config_manage.py</code>命名为<code>config_manage_local.py</code>，并把 Firebase 工程的<code>account.json</code>放到本地，然后在<code>config_manage_local.py</code>里修改 PROJECT_ID 和 credentials 的读取方式，这样就可以在命令行里直接发布 Remote Config。<br>最后工程目录结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">config-example</span><br><span class="line">├── .github</span><br><span class="line">│   └── workflows</span><br><span class="line">│       └── deploy.yaml  // Github Actions 配置文件</span><br><span class="line">├── account_key // 把当前目录加入.gitignore,防止上传到Github</span><br><span class="line">│   └── account.json</span><br><span class="line">├── remote_config</span><br><span class="line">│   └── configs.json // 各种Remote Config的json文件</span><br><span class="line">├── storage</span><br><span class="line">│   └── files  // 需要上传到Firebase Storage的文件</span><br><span class="line">├── remoteconfig.template.json</span><br><span class="line">├── config_manage.py</span><br><span class="line">├── config_manage_local.py</span><br><span class="line">└── requirement.txt</span><br></pre></td></tr></table></figure>
+
+<p>跟之前项目的 Config 工程相比，我们的工程化更加灵活，Conbine jsons to template 的逻辑还可以根据后期的需求进行调整。</p>
+<h4 id="Firebase-Storage-的-Deploy"><a href="#Firebase-Storage-的-Deploy" class="headerlink" title="Firebase Storage 的 Deploy"></a>Firebase Storage 的 Deploy</h4><p>Firebase Sotrage 文件上传就很简单了，只需要在<code>.github/workflows/</code>定义 yaml 文件，具体如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Upload</span> <span class="string">files</span> <span class="string">to</span> <span class="string">Cloud</span> <span class="string">Storage</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">    <span class="attr">pull_request:</span></span><br><span class="line">        <span class="attr">branches:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">deploy/uat-storage</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">deploy/prod-storage</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">    <span class="attr">upload:</span></span><br><span class="line">        <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line"></span><br><span class="line">        <span class="attr">permissions:</span></span><br><span class="line">            <span class="attr">contents:</span> <span class="string">&#x27;read&#x27;</span></span><br><span class="line">            <span class="attr">id-token:</span> <span class="string">&#x27;write&#x27;</span></span><br><span class="line">        <span class="attr">steps:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">&#x27;checkout&#x27;</span></span><br><span class="line">              <span class="attr">uses:</span> <span class="string">&#x27;actions/checkout@v3&#x27;</span></span><br><span class="line"></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">&#x27;auth&#x27;</span></span><br><span class="line">              <span class="attr">uses:</span> <span class="string">&#x27;google-github-actions/auth@v1&#x27;</span></span><br><span class="line">              <span class="attr">with:</span></span><br><span class="line">                  <span class="attr">credentials_json:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.CREDENTIALS</span> <span class="string">&#125;&#125;</span></span><br><span class="line"></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">&#x27;upload-folder&#x27;</span></span><br><span class="line">              <span class="attr">uses:</span> <span class="string">&#x27;google-github-actions/upload-cloud-storage@v1&#x27;</span></span><br><span class="line">              <span class="attr">with:</span></span><br><span class="line">                  <span class="attr">path:</span> <span class="string">&#x27;./storage&#x27;</span></span><br><span class="line">                  <span class="attr">destination:</span> <span class="string">&#x27;这里填写你的Bucket&#x27;</span></span><br><span class="line">                  <span class="attr">process_gcloudignore:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>到这里 Firebase Remote Config 和 Storage 的工程化就完成了，后续会考虑把 storage  里的文件部署到 Amazon S3，应该只需要添加一个 yaml 文件即可。</p>
 
     </div>
 
@@ -230,8 +262,8 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/Firebase/" rel="tag"># Firebase</a>
-              <a href="/tags/Remote-Config/" rel="tag"># Remote Config</a>
-              <a href="/tags/%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90/" rel="tag"># 持续集成</a>
+              <a href="/tags/Firebase-Storage/" rel="tag"># Firebase Storage</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
           </div>
 
         
@@ -305,6 +337,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%88%9D%E6%96%B9%E6%A1%88"><span class="nav-number">1.</span> <span class="nav-text">最初方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E9%80%A0%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">改造实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8E%E7%BB%AD%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">后续优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Firebase-Storage-%E7%9A%84-Deploy"><span class="nav-number">4.</span> <span class="nav-text">Firebase Storage 的 Deploy</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -327,13 +360,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
