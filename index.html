@@ -160,6 +160,80 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2023/07/25/firebase-remote-config-deploy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/07/25/firebase-remote-config-deploy/" class="post-title-link" itemprop="url">Firebase Remote Config的工程化案例</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-07-25 23:04:49" itemprop="dateCreated datePublished" datetime="2023-07-25T23:04:49+08:00">2023-07-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Remote-Config/" itemprop="url" rel="index"><span itemprop="name">Remote Config</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Config 工程化的灵感是来自于澳洲体育视频项目，他们的 Remote Config 工程化做的非常好，它分为两大类 Config 和 Storage，然后用 CircleCI 来自动化处理 Config 的更新和 Storage 的文件上传，是由运维人员来实现的，具体实现细节不是很清楚，所以这里我们来实现一个基于 Python 的 Config 工程化的案例。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/07/25/firebase-remote-config-deploy/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2023/05/30/unit-test-coverage-jacoco/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -234,7 +308,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2023/05/25/firebase-remote-config-deploy/">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2023/05/11/flutter-local-storage-sharepreference/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/wechat_qrcode.jpg">
@@ -248,7 +322,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2023/05/25/firebase-remote-config-deploy/" class="post-title-link" itemprop="url">Firebase Remote Config的工程化案例</a>
+            <a href="/2023/05/11/flutter-local-storage-sharepreference/" class="post-title-link" itemprop="url">Flutter本地存储之SharedPreferences</a>
         </h2>
 
         <div class="post-meta">
@@ -258,7 +332,7 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2023-05-25 23:04:49" itemprop="dateCreated datePublished" datetime="2023-05-25T23:04:49+08:00">2023-05-25</time>
+              <time title="Created: 2023-05-11 00:04:32" itemprop="dateCreated datePublished" datetime="2023-05-11T00:04:32+08:00">2023-05-11</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -266,7 +340,7 @@
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Remote-Config/" itemprop="url" rel="index"><span itemprop="name">Remote Config</span></a>
+                  <a href="/categories/Flutter%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Flutter开发</span></a>
                 </span>
             </span>
 
@@ -281,10 +355,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Config 工程化的灵感是来自于澳洲体育视频项目，他们的 Remote Config 工程化做的非常好，它分为两大类 Config 和 Storage，然后用 CircleCI 来自动化处理 Config 的更新和 Storage 的文件上传，是由运维人员来实现的，具体实现细节不是很清楚，所以这里我们来实现一个基于 Python 的 Config 工程化的案例。</p>
+          <p>Flutter 的 shared_preferences 库的作用是将数据以键值对的形式异步持久化到磁盘支持的数据类型有 int、double、bool、string、stringList，对于非 Web 平台删除 App 后数据会被清除，对于 Web 平台清除浏览器缓存后数据会被清除。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2023/05/25/firebase-remote-config-deploy/#more" rel="contents">
+              <a class="btn" href="/2023/05/11/flutter-local-storage-sharepreference/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -530,7 +604,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2022/03/16/firebase-remote-config-introduce/">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2022/03/21/firebase-remote-config-introduce/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/wechat_qrcode.jpg">
@@ -544,7 +618,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/16/firebase-remote-config-introduce/" class="post-title-link" itemprop="url">Firebase Remote Config在项目里的应用</a>
+            <a href="/2022/03/21/firebase-remote-config-introduce/" class="post-title-link" itemprop="url">Firebase Remote Config在项目里的应用</a>
         </h2>
 
         <div class="post-meta">
@@ -554,7 +628,7 @@
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2022-03-16 16:04:49" itemprop="dateCreated datePublished" datetime="2022-03-16T16:04:49+08:00">2022-03-16</time>
+              <time title="Created: 2022-03-21 19:31:26" itemprop="dateCreated datePublished" datetime="2022-03-21T19:31:26+08:00">2022-03-21</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -580,7 +654,7 @@
           <p>TODO</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/03/16/firebase-remote-config-introduce/#more" rel="contents">
+              <a class="btn" href="/2022/03/21/firebase-remote-config-introduce/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -807,7 +881,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -820,7 +894,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
