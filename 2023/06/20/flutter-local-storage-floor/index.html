@@ -28,7 +28,7 @@
 <meta property="og:description" content="floor 是 Flutter 上使用 SQLite 数据库的 ORM 框架。框架的思想借鉴了 Android Jetpack 中的Room框架，总体使用下来语法上几乎一致，对 Android 开发来说比较友好。">
 <meta property="og:locale">
 <meta property="article:published_time" content="2023-06-20T14:04:30.000Z">
-<meta property="article:modified_time" content="2023-12-28T03:48:33.840Z">
+<meta property="article:modified_time" content="2023-12-28T07:59:57.654Z">
 <meta property="article:author" content="szhangbiao">
 <meta property="article:tag" content="Flutter">
 <meta property="article:tag" content="Floor">
@@ -226,7 +226,7 @@
 
 <h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">dependencies:</span></span><br><span class="line">    <span class="attr">flutter:</span></span><br><span class="line">        <span class="attr">sdk:</span> <span class="string">flutter</span></span><br><span class="line">    <span class="attr">floor:</span> <span class="string">^1.4.2</span> <span class="string">//</span> <span class="string">包含了用于运行时数据库操作的类和方法</span></span><br><span class="line"></span><br><span class="line"><span class="attr">dev_dependencies:</span></span><br><span class="line">    <span class="attr">floor_generator:</span> <span class="string">^1.4.2</span> <span class="string">//</span> <span class="string">根据实体和</span> <span class="string">DAO</span> <span class="string">的定义生成数据库操作代码</span></span><br><span class="line">    <span class="attr">build_runner:</span> <span class="string">&#x27;&gt;=2.3.0 &lt;4.0.0&#x27;</span> <span class="string">//</span> <span class="string">Flutter</span> <span class="string">系统的生成代码工具，配合floor_generator生成数据库操作代码</span></span><br></pre></td></tr></table></figure>
 
-<p>在经过 build_runner 的命令后生成的代码中还需要 <code>sqflite</code>插件，它提供了在 Flutter 中与 SQLite 数据库进行底层交互的功能，负责管理 SQLite 数据库文件、执行原始 SQL 查询和处理数据库事务。</p>
+<p>在经过 build_runner 的命令后生成的代码中还需要 <code>sqflite</code>插件，它提供了在 Flutter 中与 SQLite 数据库进行底层交互的功能，负责管理 SQLite 数据库文件、执行原始 SQL 查询和处理数据库事务等。</p>
 <h4 id="ORM-架构体系"><a href="#ORM-架构体系" class="headerlink" title="ORM 架构体系"></a>ORM 架构体系</h4><p>框架的组件主要有：实体、数据访问对象(DAO) 和 数据库：</p>
 <ul>
 <li>一个 实体 代表一个 持久类，也就是一个 数据库表；</li>
