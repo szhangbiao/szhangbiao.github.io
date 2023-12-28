@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="floor 是 Flutter 上使用 SQLite 数据库的 ORM 框架。框架的思想借鉴了 Android Jetpack 中的Room框架，总体使用下来语法上几乎一致，对 Android 开发来说比较友好。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flutter本地存储之Floor">
+<meta property="og:url" content="https://szhangbiao.github.io/2023/06/20/flutter-local-storage-floor/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="floor 是 Flutter 上使用 SQLite 数据库的 ORM 框架。框架的思想借鉴了 Android Jetpack 中的Room框架，总体使用下来语法上几乎一致，对 Android 开发来说比较友好。">
+<meta property="og:locale">
+<meta property="article:published_time" content="2023-06-20T14:04:30.000Z">
+<meta property="article:modified_time" content="2023-12-28T03:48:33.840Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="Flutter">
+<meta property="article:tag" content="Floor">
+<meta property="article:tag" content="SQLite">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2023/06/20/flutter-local-storage-floor/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>Flutter本地存储之Floor | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2023/06/20/flutter-local-storage-floor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Flutter本地存储之Floor
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-06-20 22:04:30" itemprop="dateCreated datePublished" datetime="2023-06-20T22:04:30+08:00">2023-06-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flutter%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Flutter开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://pub.dev/packages/floor">floor</a> 是 Flutter 上使用 SQLite 数据库的 ORM 框架。框架的思想借鉴了 Android Jetpack 中的<a target="_blank" rel="noopener" href="https://developer.android.com/topic/libraries/architecture/room?hl=zh-cn">Room</a>框架，总体使用下来语法上几乎一致，对 Android 开发来说比较友好。</p>
+<span id="more"></span>
+
+<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">dependencies:</span></span><br><span class="line">    <span class="attr">flutter:</span></span><br><span class="line">        <span class="attr">sdk:</span> <span class="string">flutter</span></span><br><span class="line">    <span class="attr">floor:</span> <span class="string">^1.4.2</span> <span class="string">//</span> <span class="string">包含了用于运行时数据库操作的类和方法</span></span><br><span class="line"></span><br><span class="line"><span class="attr">dev_dependencies:</span></span><br><span class="line">    <span class="attr">floor_generator:</span> <span class="string">^1.4.2</span> <span class="string">//</span> <span class="string">根据实体和</span> <span class="string">DAO</span> <span class="string">的定义生成数据库操作代码</span></span><br><span class="line">    <span class="attr">build_runner:</span> <span class="string">&#x27;&gt;=2.3.0 &lt;4.0.0&#x27;</span> <span class="string">//</span> <span class="string">Flutter</span> <span class="string">系统的生成代码工具，配合floor_generator生成数据库操作代码</span></span><br></pre></td></tr></table></figure>
+
+<p>在经过 build_runner 的命令后生成的代码中还需要 <code>sqflite</code>插件，它提供了在 Flutter 中与 SQLite 数据库进行底层交互的功能，负责管理 SQLite 数据库文件、执行原始 SQL 查询和处理数据库事务。</p>
+<h4 id="ORM-架构体系"><a href="#ORM-架构体系" class="headerlink" title="ORM 架构体系"></a>ORM 架构体系</h4><p>框架的组件主要有：实体、数据访问对象(DAO) 和 数据库：</p>
+<ul>
+<li>一个 实体 代表一个 持久类，也就是一个 数据库表；</li>
+<li>Dao 管理对实体的访问，并负责内存中 对象 和表行 之间的 映射；</li>
+<li>数据库是底层 SQLite 数据库的中心访问点，除此之外，还负责数据库的创建、打开、关闭和升级操作。</li>
+</ul>
+<h4 id="Floor-支持的数据类型"><a href="#Floor-支持的数据类型" class="headerlink" title="Floor 支持的数据类型"></a>Floor 支持的数据类型</h4><table>
+<thead>
+<tr>
+<th>Dart 类型</th>
+<th>SQLite 类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>int</td>
+<td>INTEGER</td>
+</tr>
+<tr>
+<td>double</td>
+<td>REAL</td>
+</tr>
+<tr>
+<td>String</td>
+<td>TEXT</td>
+</tr>
+<tr>
+<td>bool</td>
+<td>INTEGER（0 &#x3D; false，1 &#x3D; true）</td>
+</tr>
+<tr>
+<td>Uint8List</td>
+<td>BLOB</td>
+</tr>
+<tr>
+<td>enum</td>
+<td>INTEGER（按索引 0..n 记录）</td>
+</tr>
+</tbody></table>
+<p>如果需要支持自定义类型则需要实现<code>class TypeConverter&lt;T, S&gt;</code>类来做类型转换，然后添加到<code>TypeConverters</code>注解中就可以了</p>
+<h4 id="项目实战中的使用"><a href="#项目实战中的使用" class="headerlink" title="项目实战中的使用"></a>项目实战中的使用</h4><p>首先是实体类：</p>
+<ul>
+<li>@entity 注解用于标注实体类对应为数据库中的表，类的属性对应为表的列，@Entity 注解可以指定表名、添加外键和索引等设置。</li>
+<li>@primaryKey 注解用于标注实体类中的主键列。当主键的数据类型是 int 且@@PrimaryKey 注解的参数 autoGenerate 为 ture 时，SQLite 可以自动生成该值。</li>
+<li>@ColumnInfo 注解用于给表中的列设置别名。</li>
+<li>@ignore 注解用于忽略某个属性。</li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// database/entity/person.dart</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package: floor/floor.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@entity</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">  <span class="meta">@primaryKey</span></span><br><span class="line">  <span class="keyword">final</span> <span class="built_in">int</span> id;</span><br><span class="line">  <span class="keyword">final</span> <span class="built_in">String</span> name;</span><br><span class="line">  <span class="meta">@ColumnInfo</span>(name: <span class="string">&#x27;nick_name&#x27;</span>)</span><br><span class="line">  <span class="keyword">final</span> <span class="built_in">String</span> nickName;</span><br><span class="line">  <span class="meta">@ColumnInfo</span>(name: <span class="string">&#x27;date_created&#x27;</span>)</span><br><span class="line">  <span class="built_in">DateTime?</span> dateCreated;</span><br><span class="line">  <span class="meta">@ColumnInfo</span>(name: <span class="string">&#x27;date_modified&#x27;</span>)</span><br><span class="line">  <span class="built_in">DateTime?</span> dateModified;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@ignore</span></span><br><span class="line">  <span class="keyword">final</span> <span class="built_in">bool</span> isFriend;</span><br><span class="line">  Person(<span class="keyword">this</span>.id, <span class="keyword">this</span>.name, <span class="keyword">this</span>.nickName, <span class="keyword">this</span>.dateCreated, <span class="keyword">this</span>.dateModified, <span class="keyword">this</span>.isFriend);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其次是 Dao 类：<br>负责管理对底层的 SQLite 数据库的访问。抽象类包含了查询数据库的方法签名，这些方法必须返回 Future 或 Stream。</p>
+<ul>
+<li>@insert 标记 Dao 类的方法是用于插入数据的，如果插入的数据跟表中的数据有冲突默认会中止，我们可以通过@Insert(onConflict: XXX)来设置冲突策略，一般有三种策略：替换、撤回、中止、失败和忽略。</li>
+<li>@update 标记 Dao 类的方法是用于更新数据的，@Update 的冲突策略跟@Insert 一致。</li>
+<li>@Query 标记 Dao 类的方法是用于查询数据的，注解里的<code>value</code>就是查询 SQL 语句。</li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// database/dao/person_dao.dart</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:floor/floor.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonDao</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将提供的 Person 对象插入到数据库中</span></span><br><span class="line">  <span class="meta">@Insert</span>(onConflict: OnConflictStrategy.replace)</span><br><span class="line">  Future&lt;<span class="keyword">void</span>&gt; insertPerson(Person person);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将提供的 Person 对象更新到数据库中</span></span><br><span class="line">  <span class="meta">@Update</span>(onConflict: OnConflictStrategy.replace)</span><br><span class="line">  Future&lt;<span class="built_in">int</span>&gt; updatePerson(Person person);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 根据提供的 id 查询并返回匹配的 Person 实体对象</span></span><br><span class="line">  <span class="meta">@Query</span>(<span class="string">&#x27;SELECT * FROM Person WHERE id = :id&#x27;</span>)</span><br><span class="line">  Future&lt;Person?&gt; findPersonById(<span class="built_in">int</span> id);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 查询并返回所有的 Person 实体对象列表</span></span><br><span class="line">  <span class="comment">// 这是一个异步数据流，当数据发生变化时，会自动更新</span></span><br><span class="line">  <span class="meta">@Query</span>(<span class="string">&#x27;SELECT * FROM Person&#x27;</span>)</span><br><span class="line">  Stream&lt;<span class="built_in">List</span>&lt;Person&gt;&gt; findAllPersons();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后是创建数据库：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// database/app_database.dart</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:floor/floor.dart&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:sqflite/sqflite.dart&#x27;</span> <span class="keyword">as</span> sqflite;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;dao/person_dao.dart&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;entity/person.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">part</span> <span class="string">&#x27;database.g.dart&#x27;</span>; <span class="comment">// Floor代码生成器将在这里生成相关的代码</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@TypeConverters</span>([</span><br><span class="line">  DateTimeConverter,</span><br><span class="line">  NullableDateTimeConverter</span><br><span class="line">])</span><br><span class="line"><span class="meta">@Database</span>(version: <span class="number">1</span>, entities: [Person]) <span class="comment">// 声明数据库版本号和包含的实体类</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AppDatabase</span> <span class="keyword">extends</span> <span class="title">FloorDatabase</span> </span>&#123;</span><br><span class="line">  PersonDao <span class="keyword">get</span> personDao; <span class="comment">// 获取PersonDao实例，用于执行数据库操作</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"><span class="language-markdown">/**</span></span></span><br><span class="line"><span class="language-markdown"><span class="comment"><span class="bullet">   *</span> 初始化数据库,提供static方法是为了调用方便也可以做成单例</span></span></span><br><span class="line"><span class="language-markdown"><span class="comment">   <span class="emphasis">*/</span></span></span></span><br><span class="line">  <span class="keyword">static</span> Future&lt;AppDatabase&gt; initDatabase() <span class="keyword">async</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> database = <span class="keyword">await</span> $FloorFitTrackDataBase</span><br><span class="line">        .databaseBuilder(<span class="string">&#x27;test.db&#x27;</span>)</span><br><span class="line">        <span class="comment">// .addMigrations([migration1to2]) // 执行数据升级表结构的变动的SQL语句</span></span><br><span class="line">        .addCallback(callback) <span class="comment">// 数据库操作的回调，如创建、打开、升级等</span></span><br><span class="line">        .build();</span><br><span class="line">    <span class="keyword">return</span> database;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> callback = Callback(</span><br><span class="line">  onCreate: (database, version) &#123;<span class="comment">/* 已创建数据库 */</span>&#125;,</span><br><span class="line">  onOpen: (database) &#123;<span class="comment">/* 数据库已打开*/</span>&#125;,</span><br><span class="line">  onUpgrade: (database, startVersion, endVersion) &#123;<span class="comment">/* 数据库已升级 */</span>&#125;,</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建一个migration</span></span><br><span class="line"><span class="comment">// final migration1to2 = Migration(1, 2, (database) async &#123;</span></span><br><span class="line"><span class="comment">//   database.execute(&#x27;SQL&#x27;);</span></span><br><span class="line"><span class="comment">// &#125;);</span></span><br></pre></td></tr></table></figure>
+
+<p>最后使用以下命令来运行生成器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flutter packages pub run build_runner build</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：<code>part &#39;database.g.dart&#39;</code>要先在文件中引入，然后再运行<code>build_runner</code>的 build 命令</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Flutter/" rel="tag"># Flutter</a>
+              <a href="/tags/Floor/" rel="tag"># Floor</a>
+              <a href="/tags/SQLite/" rel="tag"># SQLite</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/05/30/unit-test-coverage-jacoco/" rel="prev" title="单元测试覆盖率 Jacoco 集成过程">
+      <i class="fa fa-chevron-left"></i> 单元测试覆盖率 Jacoco 集成过程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/07/25/firebase-remote-config-deploy/" rel="next" title="Firebase Remote Config的工程化案例">
+      Firebase Remote Config的工程化案例 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ORM-%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB"><span class="nav-number">2.</span> <span class="nav-text">ORM 架构体系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Floor-%E6%94%AF%E6%8C%81%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">Floor 支持的数据类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">项目实战中的使用</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-file"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
