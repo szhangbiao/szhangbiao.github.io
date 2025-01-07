@@ -28,7 +28,7 @@
 <meta property="og:description" content="在启动优化方面除了常规的设置主题图片防止出现白屏或黑屏，Application 的 onCreate 方法里精简业务逻辑和三方 SDK 异步或者延迟初始化，精简首屏页面的复杂度等之外，现在有了一个新选择，就是字节出品的BootMultiDex框架。">
 <meta property="og:locale">
 <meta property="article:published_time" content="2024-09-02T11:01:10.000Z">
-<meta property="article:modified_time" content="2025-01-07T08:02:42.500Z">
+<meta property="article:modified_time" content="2025-01-07T08:14:54.558Z">
 <meta property="article:author" content="szhangbiao">
 <meta property="article:tag" content="启动优化">
 <meta property="article:tag" content="MultiDex">
@@ -224,9 +224,21 @@
         <p>在启动优化方面除了常规的<code>设置主题图片</code>防止出现白屏或黑屏，Application 的 onCreate 方法里精简业务逻辑和三方 SDK 异步或者延迟初始化，精简首屏页面的复杂度等之外，现在有了一个新选择，就是字节出品的<a target="_blank" rel="noopener" href="https://github.com/bytedance/BoostMultiDex">BootMultiDex</a>框架。</p>
 <span id="more"></span>
 
-<h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>我在开发阶段其实一直在关注 App 的启动时间，Android5.0 及以上在混淆后表现良好，几乎看不到黑屏，但是在<code>Android4.4</code>上，在做了上述常规优化后，在 App 未混淆前，启动时的黑屏能达到 4<del>5s，混淆后依然有 1</del>2s 的黑屏时间，而且默认主题图片停留的也较长，这时就不得不采用一些手段来进行优化，在做了一番调研后，发现字节出品的 BoostMultiDex 很契合我们现在的需求，它是一款用于 Android 低版本设备（4.X 及以下，SDK &lt; 21）快速加载多 DEX 的解决方案。</p>
+<h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>我在开发阶段其实一直在关注 App 的启动时间，Android5.0 及以上在混淆后表现良好，几乎看不到黑屏，但是在<code>Android4.4</code>上，在做了上述常规优化后，在 App 未混淆前，启动时的黑屏能达到 4-5s，混淆后依然有 1-2s 的黑屏时间，而且默认主题图片停留的也较长，这时就不得不采用一些手段来进行优化，在做了一番调研后，发现字节出品的 BoostMultiDex 很契合我们现在的需求，它是一款用于 Android 低版本设备（4.X 及以下，SDK &lt; 21）快速加载多 DEX 的解决方案。</p>
 <h4 id="MultiDex-过程"><a href="#MultiDex-过程" class="headerlink" title="MultiDex 过程"></a>MultiDex 过程</h4><p><code>MultiDex</code>会在主线程中对 APK 内的原始 DEX 文件做 ODEX 优化</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant APK as APK</span><br><span class="line">    participant FileSystem as 文件系统</span><br><span class="line">    participant DexFile as DexFile</span><br><span class="line">    participant odex as classesN.odex</span><br><span class="line">    participant dexPathList as dexPathList.dexElements</span><br><span class="line"></span><br><span class="line">    APK-&gt;&gt;FileSystem: 解压 classes2.dex (Secondary dexes)</span><br><span class="line">    FileSystem-&gt;&gt;FileSystem: 压缩成 classes2.zip</span><br><span class="line">    FileSystem-&gt;&gt;DexFile: DexFile.loadDex 优化 classes2.zip</span><br><span class="line">    DexFile-&gt;&gt;odex: 生成 classes2.odex</span><br><span class="line">    DexFile-&gt;&gt;dexPathList: 添加 classesN.odex 到 dexPathList.dexElements</span><br><span class="line">    dexPathList-&gt;&gt;DexFile: 完成 dex 加载</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+    participant APK as APK
+    participant FileSystem as 文件系统
+    participant DexFile as DexFile
+    participant odex as classesN.odex
+    participant dexPathList as dexPathList.dexElements
+
+    APK->>FileSystem: 解压 classes2.dex (Secondary dexes)
+    FileSystem->>FileSystem: 压缩成 classes2.zip
+    FileSystem->>DexFile: DexFile.loadDex 优化 classes2.zip
+    DexFile->>odex: 生成 classes2.odex
+    DexFile->>dexPathList: 添加 classesN.odex 到 dexPathList.dexElements
+    dexPathList->>DexFile: 完成 dex 加载</pre>
 
 <p>这里存在性能瓶颈有两个地方：</p>
 <ul>
@@ -408,6 +420,23 @@
   </span>
   <span class="author" itemprop="copyrightHolder">szhangbiao</span>
 </div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
 
         
 <div class="busuanzi-count">
