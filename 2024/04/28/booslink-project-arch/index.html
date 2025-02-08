@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="回顾整个职业生涯，上一次对项目进行可独立运行的组件化工程改造还是七年前，当时对项目进行第三次重构，想要引入当时比较火的组件化的配置，受限于参考资料比较少，再加上业务上堆积了其他很多的事情，后面对这块也就放弃了，时间来到现在，新项目要求每个人单独负责自己的功能模块且互不影响，这就很符合组件化的概念，于是决定在这个项目中把组件化重拾起来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="项目组件化工程配置">
+<meta property="og:url" content="https://szhangbiao.github.io/2024/04/28/booslink-project-arch/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="回顾整个职业生涯，上一次对项目进行可独立运行的组件化工程改造还是七年前，当时对项目进行第三次重构，想要引入当时比较火的组件化的配置，受限于参考资料比较少，再加上业务上堆积了其他很多的事情，后面对这块也就放弃了，时间来到现在，新项目要求每个人单独负责自己的功能模块且互不影响，这就很符合组件化的概念，于是决定在这个项目中把组件化重拾起来。">
+<meta property="og:locale">
+<meta property="og:image" content="https://szhangbiao.github.io/images/component-relationship.png">
+<meta property="article:published_time" content="2024-04-28T12:11:31.000Z">
+<meta property="article:modified_time" content="2025-02-08T14:51:29.148Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="组件化">
+<meta property="article:tag" content="Maven">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://szhangbiao.github.io/images/component-relationship.png">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2024/04/28/booslink-project-arch/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>项目组件化工程配置 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2024/04/28/booslink-project-arch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          项目组件化工程配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-04-28 20:11:31" itemprop="dateCreated datePublished" datetime="2024-04-28T20:11:31+08:00">2024-04-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BB%84%E4%BB%B6%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">组件化</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>回顾整个职业生涯，上一次对项目进行可独立运行的组件化工程改造还是七年前，当时对项目进行第三次重构，想要引入当时比较火的组件化的配置，受限于参考资料比较少，再加上业务上堆积了其他很多的事情，后面对这块也就放弃了，时间来到现在，新项目要求每个人单独负责自己的功能模块且互不影响，这就很符合组件化的概念，于是决定在这个项目中把组件化重拾起来。</p>
+<span id="more"></span>
+
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>我对 SVN 使用要追溯到 14 年且使用的程度也不深，15 年换了工作后就没再接触了，印象中遇到代码冲突是比较麻烦的。新加入的公司代码管理工具一直是 SVN，为了避免组员之间的代码冲突，会把工程进行拆分，首先按照人员在工程目录下创建对应的子工程目录，每个人在自己的所属工程目录下按照所分配的业务功能来进行模块化拆分，在模块功能开发完后就把他推到私有 maven 服务器里供自己或其他成员的模块引用，以此在物理层面实现成员之间代码的隔离。</p>
+<p>这样做的好处就是：</p>
+<ul>
+<li>成员之间的代码互不干扰，可以在自己的工程下自由发挥</li>
+<li>业务模块划分比较清晰，后续如果出问题也方便定责</li>
+<li>物理层面进行代码隔离，彻底避免代码冲突出现的可能</li>
+</ul>
+<p>当然也有缺点：</p>
+<ul>
+<li>每个子工程就是一个独立的 Android 工程，需要额外配置<code>app</code>模块</li>
+<li>成员的开发能力不一致，也造就了开发规范和技术栈不一致，代码管理相对混乱</li>
+<li>模块间沟通成本较高且出现问题<code>Debug</code>时间也会变长</li>
+<li>成员之间并不会互相关注对方代码，只关注功能实现，不能互相借鉴学习</li>
+</ul>
+<p>因此我在接受重构项目的任务后，为了兼顾之前的项目特点，决定使用组件化对工程进行改造</p>
+<h3 id="思考过程"><a href="#思考过程" class="headerlink" title="思考过程"></a>思考过程</h3><p>组件化的基础是模块化，站在<code>整体</code>的角度上把工程拆分为多个模块，按照模块的功能和职责划分的话，其中一些模块里封装了特定的业务逻辑和 UI，这些模块就可以称为组件，组件模块除了满足高内聚、低耦合和可独立替换或更新的特点外，在某些情况下，可以独立运行和部署。</p>
+<p>在 Android 工程层面，一个模块可以单独运行和调试，那它的模块类型必须是<code>application</code>，如果它想被其他模块引用，那它的模块类型必须是<code>library</code>，于是就有了以下样板代码：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(isComponent)&#123;</span><br><span class="line">    apply <span class="attr">plugin:</span> <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    apply <span class="attr">plugin:</span> <span class="string">&#x27;com.android.library&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可独立运行的组件还需要一些额外的配套，像作为<code>application</code>时所必须的<code>AndroidManifest.xml</code>、<code>Application</code>类和入口<code>Activity</code>等</p>
+<h3 id="技术要点"><a href="#技术要点" class="headerlink" title="技术要点"></a>技术要点</h3><p>以下每一个技术点单拎出来都可以长篇大论一番，这里我们只做简单的介绍</p>
+<h4 id="三方库管理工具-Catalogs"><a href="#三方库管理工具-Catalogs" class="headerlink" title="三方库管理工具 Catalogs"></a>三方库管理工具 Catalogs</h4><p>Gradle 7.0 引入的一种新特性，以可扩容的方式添加和维护依赖项和插件。</p>
+<ul>
+<li>提高 build 文件的可读性和一致性，减少重复和冗余的代码</li>
+<li>支持代码补全和导航，提高开发效率和准确性</li>
+<li>方便地在一个地方管理依赖项和插件的版本，避免版本冲突和不匹配的问题</li>
+<li>支持多项目构建和复用，提高构建性能和稳定性</li>
+</ul>
+<h4 id="Kotlin-Script"><a href="#Kotlin-Script" class="headerlink" title="Kotlin Script"></a>Kotlin Script</h4><p><code>Kotlin Script</code>简称<code>KTS</code>，<code>Gradle 4.0</code>支持在<code>build.gradle</code>配置中使用 Kotlin，用于替代<code>Groovy</code></p>
+<ul>
+<li>采用 Kotlin 编写的代码可读性更高</li>
+<li>提供了更好的编译时检查和 IDE 支持</li>
+<li>能更好地在 Android Studio 的代码编辑器中集成</li>
+</ul>
+<h4 id="自定义Gradle插件"><a href="#自定义Gradle插件" class="headerlink" title="自定义Gradle插件"></a>自定义<code>Gradle</code>插件</h4><p>相对于在<code>gradle.properties</code>里定义一个变量来控制模块的类型，自定义<code>gradle</code>插件的方式更加灵活，封装的比较好的话也可以发布到远程分享出去</p>
+<p>编写自定义插件目的主要是参与编译构建 Android 工程，去完成一些特定的功能</p>
+<p>主要分为两种：</p>
+<h5 id="1-脚本插件"><a href="#1-脚本插件" class="headerlink" title="1.脚本插件"></a>1.脚本插件</h5><p>创建一个<code>.gradle</code>后缀的文件，通过<code>apply from</code>引入，然后在<code>build.gradle</code>中调用插件</p>
+<h5 id="2-对象插件"><a href="#2-对象插件" class="headerlink" title="2.对象插件"></a>2.对象插件</h5><p>主要是实现<code>org.gradle.api</code>下的<code>Plugin</code>接口，有三种编写形式：</p>
+<ul>
+<li>在<code>build.gradle</code>文件中直接编写</li>
+<li>在<code>buildSrc</code>默认插件目录下编写</li>
+<li>在自定义模块中编写</li>
+</ul>
+<blockquote>
+<p>这里为了配合<code>catalogs</code>的使用，我们使用的是对象插件且是在自定义模块下编写自定义插件</p>
+</blockquote>
+<h4 id="模块AAR化"><a href="#模块AAR化" class="headerlink" title="模块AAR化"></a>模块<code>AAR</code>化</h4><p>工程模块化会把工程代码分散到一个个独立的模块中，增加内聚降低耦合的同时也方便后续管理维护，但是带来的副作用是一次工程的全量编译会花费非常多的时间，模块的数量越多，花费时间越长。</p>
+<p>目前普遍的解决方案是把模块预编译成<code>AAR</code>文件，然后在主模块中引用，这里主要用到<code>maven-push</code>这个三方插件，它支持把生成的<code>AAR</code>文件推到本地或者远程仓库，然后在主工程里像使用第三方库一样去使用我们的模块。</p>
+<p><code>maven-push</code>的配置使用的是以脚本插件的方式引入，主要的代码实现如下：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//script/maven-publish.gradle</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;maven-publish&#x27;</span></span><br><span class="line"></span><br><span class="line">tasks.withType(PublishToMavenRepository).tap &#123;</span><br><span class="line">    configureEach &#123; task -&gt;</span><br><span class="line">        <span class="comment">// 第一个参数是match渠道，第二个是match类型（MavenRepository、MavenLocal）</span></span><br><span class="line">        <span class="keyword">def</span> match = task.name =~ <span class="string">&#x27;^publish(.*)(Release|Debug)PublicationTo(.*)$&#x27;</span></span><br><span class="line">        dependsOn(<span class="string">&quot;assemble$&#123;match[0][1]&#125;&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 这里我们使用一个变量控制maven推送到本地还是远程</span></span><br><span class="line"><span class="keyword">def</span> useMavenLocal = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">afterEvaluate &#123;</span><br><span class="line">    publishing &#123;</span><br><span class="line">        <span class="keyword">def</span> name = project.name</span><br><span class="line">        <span class="keyword">def</span> mavenPublish = Config.MODULES_MAVEN_CONFIG.get(name)</span><br><span class="line">        <span class="keyword">if</span> (mavenPublish != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">def</span> versionName = mavenPublish.version</span><br><span class="line">            publications &#123;</span><br><span class="line">                release(MavenPublication) &#123;</span><br><span class="line">                    groupId = mavenPublish.groupId</span><br><span class="line">                    artifactId = mavenPublish.artifactId</span><br><span class="line">                    version = mavenPublish.version</span><br><span class="line">                    <span class="keyword">def</span> buildType = versionName.endsWith(<span class="string">&#x27;SNAPSHOT&#x27;</span>) ? <span class="string">&#x27;debug&#x27;</span> : <span class="string">&#x27;release&#x27;</span></span><br><span class="line">                    artifact <span class="string">&quot;build/outputs/aar/$&#123;name&#125;-$&#123;buildType&#125;.aar&quot;</span></span><br><span class="line">                    pom.withXml &#123;</span><br><span class="line">                        <span class="keyword">def</span> dependenciesNode = asNode().appendNode(<span class="string">&#x27;dependencies&#x27;</span>)</span><br><span class="line">                        <span class="keyword">def</span> scopes = [configurations.implementation]</span><br><span class="line">                        <span class="keyword">if</span> (configurations.hasProperty(<span class="string">&quot;api&quot;</span>)) &#123;</span><br><span class="line">                            scopes.add(configurations.api)</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">if</span> (configurations.hasProperty(<span class="string">&quot;implementation&quot;</span>)) &#123;</span><br><span class="line">                            scopes.add(configurations.implementation)</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">if</span> (configurations.hasProperty(<span class="string">&quot;debugImplementation&quot;</span>)) &#123;</span><br><span class="line">                            scopes.add(configurations.debugImplementation)</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">if</span> (configurations.hasProperty(<span class="string">&quot;releaseImplementation&quot;</span>)) &#123;</span><br><span class="line">                            scopes.add(configurations.releaseImplementation)</span><br><span class="line">                        &#125;</span><br><span class="line">                        scopes.each &#123; scope -&gt;</span><br><span class="line">                            scope.allDependencies.each &#123;</span><br><span class="line">                                <span class="keyword">if</span> (it <span class="keyword">instanceof</span> ModuleDependency) &#123;</span><br><span class="line">                                    <span class="type">boolean</span> isTransitive = ((ModuleDependency) it).transitive</span><br><span class="line">                                    <span class="keyword">if</span> (!isTransitive) &#123;</span><br><span class="line">                                        <span class="keyword">return</span></span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125;</span><br><span class="line">                                <span class="keyword">if</span> (it.group == <span class="string">&quot;$&#123;project.rootProject.name&#125;.libs&quot;</span> || it.version == <span class="string">&#x27;unspecified&#x27;</span>) &#123;</span><br><span class="line">                                    <span class="keyword">return</span></span><br><span class="line">                                &#125;</span><br><span class="line">                                <span class="keyword">if</span> (it.group &amp;&amp; it.name &amp;&amp; it.version) &#123;</span><br><span class="line">                                    <span class="keyword">def</span> dependencyNode = dependenciesNode.appendNode(<span class="string">&#x27;dependency&#x27;</span>)</span><br><span class="line">                                    dependencyNode.appendNode(<span class="string">&#x27;groupId&#x27;</span>, it.group)</span><br><span class="line">                                    dependencyNode.appendNode(<span class="string">&#x27;artifactId&#x27;</span>, it.name)</span><br><span class="line">                                    dependencyNode.appendNode(<span class="string">&#x27;version&#x27;</span>, it.version)</span><br><span class="line">                                    dependencyNode.appendNode(<span class="string">&#x27;scope&#x27;</span>, scope.name)</span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            repositories &#123; RepositoryHandler handler -&gt;</span><br><span class="line">                <span class="keyword">if</span> (useMavenLocal) &#123;</span><br><span class="line">                    maven &#123;</span><br><span class="line">                        url = uri(<span class="string">&quot;$&#123;project.rootDir&#125;/.mavenLocal/repository&quot;</span>)</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    maven &#123;</span><br><span class="line">                        allowInsecureProtocol = <span class="literal">true</span></span><br><span class="line">                        url = versionName.endsWith(<span class="string">&#x27;SNAPSHOT&#x27;</span>) ? Config.MAVEN.snapshotUrl : Config.MAVEN.releaseUrl</span><br><span class="line">                        credentials &#123;</span><br><span class="line">                            username = Config.MAVEN.credentials.username</span><br><span class="line">                            password = Config.MAVEN.credentials.password</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的<code>Config</code>类定义在<code>buildSrc</code>下，用于定义阿里云效<code>Maven</code>的配置以及需要发布到阿里云效下<code>Maven</code>的模块配置信息。</p>
+<p>然后在项目级的<code>build.gradle.kts</code>中引入一下</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// build.gradle.kts</span></span><br><span class="line">    ...</span><br><span class="line">subprojects &#123;</span><br><span class="line">    apply(<span class="string">&quot;<span class="subst">$&#123;project.rootDir&#125;</span>/script/maven-publish.gradle&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里的脚本插件之所以使用<code>groovy</code>语言，是因为<code>KTS</code>不支持用来写脚本插件，写完之后无法像<code>.gradle</code>文件那样在<code>build.gradle.kts</code>中引入，所以这里使用<code>groovy</code>语言来实现</p>
+</blockquote>
+<h3 id="代码实施"><a href="#代码实施" class="headerlink" title="代码实施"></a>代码实施</h3><p>结合上面的技术要点和项目的情况，我针对模块的类型定义了三个类型的<code>gradle</code>插件</p>
+<ul>
+<li>App：在工程里主要是指<code>:app</code>模块</li>
+<li>Component：主要是指<code>:feature:*</code>模块,可以通过配置来决定是 Application 还是 Library</li>
+<li>Lib：在工程里主要是指<code>:core:*</code>模块</li>
+</ul>
+<p><code>App</code>和<code>Lib</code>插件类分别封装了<code>app</code>和<code>core</code>模块下<code>build.gradle.kts</code>所需要的配置，像常见的<code>buildType</code>、<code>compileOptions</code>、<code>productFlavors</code>、<code>signingConfigs</code>、<code>sourceSets</code>和<code>Dependencies</code>等等</p>
+<p><code>Component</code>插件类封装了<code>feature</code>模块下<code>build.gradle.kts</code>所需要的配置以及根据配置来决定是<code>Application</code>还是<code>Library</code>的配置，这个额外的配置有两个开关，一个总开关和各个组件模块下的子开关，总开关在插件工程的相应的代码里，子开关则放在组件模块下的<code>local.properties</code>里且把这个文件加入到<code>.gitignore</code>里，这样组员打开总开关后，可以准对不同组件模块在本地做不同的配置且不互相影响</p>
+<p>以下是插件工程的相关配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">build-logic</span><br><span class="line">─── convention</span><br><span class="line">    ├── src/main/kotlin <span class="comment"># 自定义插件以及相关配置的代码</span></span><br><span class="line">    └── build.gradle.kts</span><br><span class="line">settings.gradle.kts</span><br></pre></td></tr></table></figure>
+
+<p><code>settings.gradle.kts</code>里主要引入了<code>catalogs</code></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// build-logic/settings.gradle.kts</span></span><br><span class="line">dependencyResolutionManagement &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        mavenCentral()</span><br><span class="line">    &#125;</span><br><span class="line">    versionCatalogs &#123;</span><br><span class="line">        create(<span class="string">&quot;libs&quot;</span>) &#123;</span><br><span class="line">            from(files(<span class="string">&quot;../gradle/libs.versions.toml&quot;</span>))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">rootProject.name = <span class="string">&quot;build-logic&quot;</span></span><br><span class="line">include(<span class="string">&quot;:convention&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>convention</code>下的<code>build.gradle.kts</code>里主要定义了插件的注册</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// build-logic/convention/build.gradle.kts</span></span><br><span class="line">plugins &#123;</span><br><span class="line">    `kotlin-dsl`</span><br><span class="line">&#125;</span><br><span class="line">repositories &#123;</span><br><span class="line">    google()</span><br><span class="line">    mavenCentral()</span><br><span class="line">    <span class="comment">// google() 国内阿里云替代</span></span><br><span class="line">    maven &#123; url = uri(<span class="string">&quot;https://maven.aliyun.com/repository/google&quot;</span>) &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation(libs.android.gradle.plugin)</span><br><span class="line">    implementation(libs.android.tools.common)</span><br><span class="line">    <span class="comment">//gradle sdk</span></span><br><span class="line">    implementation(gradleApi())</span><br><span class="line">    <span class="comment">//groovy sdk</span></span><br><span class="line">    implementation(localGroovy())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">gradlePlugin &#123;</span><br><span class="line">    plugins &#123;</span><br><span class="line">        plugins &#123;</span><br><span class="line">            register(<span class="string">&quot;androidComponent&quot;</span>) &#123;</span><br><span class="line">                id = <span class="string">&quot;com.build.component&quot;</span></span><br><span class="line">                implementationClass = <span class="string">&quot;plugins.ComponentBuildPlugin&quot;</span></span><br><span class="line">                version = <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面主要给出<code>Component</code>插件的伪代码</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// build-logic/convention/src/main/kotlin/plugins/ComponentBuildPlugin.kt</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ComponentBuildPlugin</span> : <span class="type">Plugin</span>&lt;<span class="type">Project</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">apply</span><span class="params">(project: <span class="type">Project</span>)</span></span> &#123;</span><br><span class="line">        with(project) &#123;</span><br><span class="line">            <span class="comment">// 根据条件判断应用该插件的模块是Application还是Library</span></span><br><span class="line">            <span class="keyword">if</span>(xxx) &#123;</span><br><span class="line">                pluginManager.apply(<span class="string">&quot;com.android.application&quot;</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                pluginManager.apply(<span class="string">&quot;com.android.library&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// sourceSets 配置</span></span><br><span class="line">            sourceSets &#123;</span><br><span class="line">                getByName(<span class="string">&quot;main&quot;</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span>(xxx) &#123;</span><br><span class="line">                        manifest.srcFile(<span class="string">&quot;src/component/AndroidManifest.xml&quot;</span>)</span><br><span class="line">                        java.srcDirs(<span class="string">&quot;src/main/java&quot;</span>, <span class="string">&quot;src/component/java&quot;</span>)</span><br><span class="line">                        assets.srcDirs(<span class="string">&quot;src/main/assets&quot;</span>, <span class="string">&quot;src/component/assets&quot;</span>)</span><br><span class="line">                        jniLibs.srcDirs(<span class="string">&quot;src/main/jniLibs&quot;</span>, <span class="string">&quot;src/component/jniLibs&quot;</span>)</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        manifest.srcFile(<span class="string">&quot;src/main/AndroidManifest.xml&quot;</span>)</span><br><span class="line">                        java.srcDirs(<span class="string">&quot;src/main/java&quot;</span>)</span><br><span class="line">                        assets.srcDirs(<span class="string">&quot;src/main/assets&quot;</span>)</span><br><span class="line">                        jniLibs.srcDirs(<span class="string">&quot;src/main/jniLibs&quot;</span>)</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从代码可以看出，这里主要把组件模块独立运行所需要的相关资源，放到模块下<code>main</code>同级别的<code>component</code>下了</p>
+<h3 id="延伸"><a href="#延伸" class="headerlink" title="延伸"></a>延伸</h3><p>还是本着配置的原则，支持模块间的协作与高效效率开发，这里通过代码来实现</p>
+<p>模块作为<code>Application</code>级别的模块时，可以配置当前模块对其他模块的依赖方式：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="keyword">class</span> <span class="title class_">CompileMode</span> &#123;</span><br><span class="line">    LIBRARY,</span><br><span class="line">    HYBRID,</span><br><span class="line">    PROJECT</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>针对不同的模块做类的封装</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">App</span>(</span><br><span class="line">    <span class="keyword">val</span> applicationId: String,</span><br><span class="line">    <span class="keyword">val</span> compileMode: CompileMode = CompileMode.LIBRARY,</span><br><span class="line">    <span class="comment">// 当compileMode为Hybrid时, feature 以哪种形式在App中引入 true  library() false project()</span></span><br><span class="line">    <span class="keyword">val</span> featureFlags: Map&lt;String, <span class="built_in">Boolean</span>&gt; = mapOf(<span class="string">&quot;main&quot;</span> to <span class="literal">true</span>,...),</span><br><span class="line">    <span class="comment">// 当compileMode为Hybrid时, library 以那种形式在App中引入 true  library() false project()</span></span><br><span class="line">    <span class="keyword">val</span> libraryFlags: List&lt;Library&gt; = listOf(</span><br><span class="line">        Library(<span class="string">&quot;model&quot;</span>, <span class="literal">true</span>),</span><br><span class="line">        ...</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">Features</span>(</span><br><span class="line">    <span class="keyword">val</span> name: String,</span><br><span class="line">    <span class="keyword">val</span> applicationId: String,</span><br><span class="line">    <span class="keyword">val</span> compileMode: CompileMode = CompileMode.PROJECT,</span><br><span class="line">    <span class="comment">// 当compileMode为Hybrid时, library 以那种形式在App中引入 true  library() false project()</span></span><br><span class="line">    <span class="keyword">val</span> libraryFlags: List&lt;Library&gt; = listOf(</span><br><span class="line">        Library(<span class="string">&quot;model&quot;</span>, <span class="literal">true</span>),</span><br><span class="line">        ...</span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">data</span> <span class="keyword">class</span> <span class="title class_">Library</span>(<span class="keyword">val</span> name: String, <span class="keyword">val</span> libraryFlag: <span class="built_in">Boolean</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在结构化后再处理对应的依赖关系，最后给出三种模式的关系图：<br><img src="/../images/component-relationship.png" alt="image"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>结合一些我看过的有关组件化开发的文章，我个人还是比较倾向于使用这种内置在工程内部的组件化方案</p>
+<p>主要有以下优点：</p>
+<ul>
+<li>每个模块通用的<code>gradle</code>配置可以放到自定义插件中，提高可维护性</li>
+<li>针对项目的特点或者某个特别的模块可以做一些额外的处理，随时改动立马就见效果</li>
+<li>比较灵活，可以通过配置来实现不同的方式，既可以全量编译，又可以部分模块参与编译运行</li>
+</ul>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://juejin.cn/post/7128069998978793509">模块化案例解读</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/59822a7b2fad">组件化开发实践</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/mqzhangw/JIMU">组件化案例 Demo</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/android/nowinandroid">NowInAndroid</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/aydinnrz/gradle_convention_plugins">Gradle 插件开发</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BB%84%E4%BB%B6%E5%8C%96/" rel="tag"># 组件化</a>
+              <a href="/tags/Maven/" rel="tag"># Maven</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/04/02/android-svn-learning/" rel="prev" title="Android 开发用SVN做版本管理">
+      <i class="fa fa-chevron-left"></i> Android 开发用SVN做版本管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/06/15/booslink-screen-adapter/" rel="next" title="开发板上二十多种分辨率屏幕适配总结">
+      开发板上二十多种分辨率屏幕适配总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%80%83%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">思考过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E8%A6%81%E7%82%B9"><span class="nav-number">3.</span> <span class="nav-text">技术要点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E6%96%B9%E5%BA%93%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7-Catalogs"><span class="nav-number">3.1.</span> <span class="nav-text">三方库管理工具 Catalogs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kotlin-Script"><span class="nav-number">3.2.</span> <span class="nav-text">Kotlin Script</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89Gradle%E6%8F%92%E4%BB%B6"><span class="nav-number">3.3.</span> <span class="nav-text">自定义Gradle插件</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E8%84%9A%E6%9C%AC%E6%8F%92%E4%BB%B6"><span class="nav-number">3.3.1.</span> <span class="nav-text">1.脚本插件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E5%AF%B9%E8%B1%A1%E6%8F%92%E4%BB%B6"><span class="nav-number">3.3.2.</span> <span class="nav-text">2.对象插件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97AAR%E5%8C%96"><span class="nav-number">3.4.</span> <span class="nav-text">模块AAR化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E6%96%BD"><span class="nav-number">4.</span> <span class="nav-text">代码实施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%B6%E4%BC%B8"><span class="nav-number">5.</span> <span class="nav-text">延伸</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
