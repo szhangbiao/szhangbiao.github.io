@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近一个开药店的朋友找我抱怨，有一个同行最近在搞恶性竞争，同类的商品经常标价比他们家少一分钱，应该是从哪来搞来了他们家在外卖平台上的商品数据，从而准对性的进行调价，于是就找到我，问我有没有办法爬取这家同行的数据，想要做一些应对避免流失很对线上的订单，于是就有了这次尝试。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Appium + Python外卖医药数据爬取">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/03/02/python-appium-spider/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="最近一个开药店的朋友找我抱怨，有一个同行最近在搞恶性竞争，同类的商品经常标价比他们家少一分钱，应该是从哪来搞来了他们家在外卖平台上的商品数据，从而准对性的进行调价，于是就找到我，问我有没有办法爬取这家同行的数据，想要做一些应对避免流失很对线上的订单，于是就有了这次尝试。">
+<meta property="og:locale">
+<meta property="og:image" content="https://szhangbiao.github.io/images/drugs-data-spider.gif">
+<meta property="article:published_time" content="2025-03-02T12:11:31.000Z">
+<meta property="article:modified_time" content="2025-03-15T16:53:39.273Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="数据爬虫">
+<meta property="article:tag" content="Appium">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://szhangbiao.github.io/images/drugs-data-spider.gif">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/03/02/python-appium-spider/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>Appium + Python外卖医药数据爬取 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/03/02/python-appium-spider/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Appium + Python外卖医药数据爬取
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-03-02 20:11:31" itemprop="dateCreated datePublished" datetime="2025-03-02T20:11:31+08:00">2025-03-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AA%E4%BA%BA%E9%A1%B9%E7%9B%AE/" itemprop="url" rel="index"><span itemprop="name">个人项目</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近一个开药店的朋友找我抱怨，有一个同行最近在搞恶性竞争，同类的商品经常标价比他们家少一分钱，应该是从哪来搞来了他们家在外卖平台上的商品数据，从而准对性的进行调价，于是就找到我，问我有没有办法爬取这家同行的数据，想要做一些应对避免流失很对线上的订单，于是就有了这次尝试。</p>
+<span id="more"></span>
+
+<h4 id="顾虑"><a href="#顾虑" class="headerlink" title="顾虑"></a>顾虑</h4><p>一开始我的想法是从<code>Github</code>上找一些开源的方案，简单快速的把数据搞到就行，搜索了一番发现大部分都是四五年前的很久没更新的代码，不能用不说，有的还是搞黑产的做宣传的，于是就放弃了开源方案这一想法。国内的爬虫行业是一个高危职业，处于灰色地带，搞不好就会进去踩缝纫机，再加上外卖平台基本上都是大厂的产品，反扒机制已经做的很全面了，数据爬取的难度比以前也大很多，所以跟朋友话也没说很满，只是答应他先尝试一番再说。</p>
+<p>于是就抱着学习同时也遵守相关法律法规和道德规范，不利用抓包技术从事非法活动的想法跟心态开始了一番探索</p>
+<h4 id="技术选型"><a href="#技术选型" class="headerlink" title="技术选型"></a>技术选型</h4><p>经过一番技术调研，大致了解了各种方案的优缺点</p>
+<p><strong>Web\H5 端：</strong></p>
+<p>方案：基于<code>Selenium</code> + <code>Chrome</code>的浏览器页面抓取<br>优点：</p>
+<ul>
+<li>开发成本较低，有完善的文档和社区支持</li>
+<li>能够模拟真实用户的浏览行为</li>
+<li>可以处理动态加载的 JavaScript 内容</li>
+<li>支持多平台（Windows、Linux、Mac）</li>
+<li>可以截图和录制浏览过程，便于调试</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>运行效率较低，每次请求都需要完整加载浏览器</li>
+<li>内存占用较大，不适合大规模并发爬取</li>
+<li>容易被反爬虫系统识别（WebDriver 特征明显）</li>
+<li>需要安装和维护 Chrome 浏览器及驱动</li>
+<li>页面结构变化时容易失效，需要经常维护选择器</li>
+</ul>
+<p><strong>App 端：</strong></p>
+<p>方案：<code>Appium</code> + <code>Python</code>手机端页面数据抓取</p>
+<p>优点：</p>
+<ul>
+<li>更接近真实用户操作，不易被识别为爬虫</li>
+<li>可以访问移动端专属功能和界面</li>
+<li>支持多种移动平台（Android&#x2F;iOS）</li>
+<li>可以绕过一些针对网页端的反爬措施</li>
+<li>能够处理复杂的手势操作和动态加载</li>
+<li>支持录制和回放操作步骤</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>环境配置复杂，需要配置<code>Android SDK</code>、模拟器等</li>
+<li>运行速度较慢，每次操作都需要等待<code>UI</code>响应</li>
+<li>设备资源消耗大，单机并发能力有限</li>
+<li>当<code>App</code>版本更新时可能需要更新脚本</li>
+<li>开发和维护成本相对较高</li>
+</ul>
+<p>还有一些更加底层的方案</p>
+<ul>
+<li>网页端解析拿到<code>API</code>请求的参数，然后使用目标接口去请求</li>
+<li>电脑端使用网络请求代理软件直接拦截获取数据</li>
+<li>手机端底层处理<code>SSL</code>证书，然后使用抓包工具抓取数据</li>
+</ul>
+<p>最后决定使用<code>Appium</code> + <code>Python</code>手机端数据爬取，这个方案跟我的技术栈相对较接近，开始写程序前就是各种软件及开发环境的配置</p>
+<h4 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h4><p>最基础的就是<a target="_blank" rel="noopener" href="https://appium.io/docs/en/latest/quickstart/install/">Appium</a>和<a target="_blank" rel="noopener" href="https://github.com/appium/appium-inspector/releases">Appium Inspector</a>的安装，同时使用最通用的<a target="_blank" rel="noopener" href="https://appium.io/docs/en/latest/quickstart/uiauto2-driver/">UiAutomator2</a>这个<code>Driver</code>。</p>
+<p>以下列举所需要的环境配置：</p>
+<ul>
+<li><code>Node</code>环境：<code>Appium</code>和<a target="_blank" rel="noopener" href="https://appium.io/docs/en/latest/ecosystem/drivers/">Appium Drivers</a>依赖 Node 环境安装和运行</li>
+<li><code>Appium Drivers</code>：需要<a target="_blank" rel="noopener" href="https://appium.io/docs/en/latest/ecosystem/drivers/">Appium Drivers</a>在相应的<code>platform</code>上驱动自动化运行，首选推荐<code>UiAutomator2</code></li>
+<li><code>Appium Inspector</code>：用来查看元素的<code>id</code>或者<code>xpath</code>,然后在脚本中查找元素从而进行操作</li>
+<li><code>UiAutomator2</code>：安装后使用命令检查必备条件，检查<code>Android SDK</code>、<code>Java JDK</code>等安装及环境变量</li>
+<li><code>Android</code>设备：一个<code>Android</code>模拟器或者真实设备</li>
+</ul>
+<blockquote>
+<p>UiAutomator2 是 Appium Drivers 的一种，是官方比较推荐的，安装完成后可以使用<code>appium driver install uiautomator2</code>命令来检查。<br>目前一些的介绍<code>Appium</code>文章比较老旧，还是官方文档最靠谱，不熟悉的概念可以通过<code>AI</code>去了解</p>
+</blockquote>
+<h4 id="初步方案"><a href="#初步方案" class="headerlink" title="初步方案"></a>初步方案</h4><p><code>Appium</code>是手机跨端进行自动化测试的一种方案，可以使用很多语言与之交互，包括<code>JS</code>、<code>Python</code>、<code>Java</code>、<code>Ruby</code>和<code>.NET</code>，我选了我相对比较熟悉的<code>Python</code>进行开发。<br>整个开发过程就是使用<code>Appium</code>提供的<code>API</code>来模拟用户操作，流程如下：</p>
+<p>打开目标 APP -&gt; 等待主页显示并关闭一些弹窗 -&gt; 在主页检查目标地址（不符合则进行地址选取操作） -&gt; 到搜索页搜索关键字 -&gt; 寻找目标商家并进入商家详情 -&gt; 开始一系列收集数据的操作。</p>
+<p>在开发层面也做了一些处理：</p>
+<ul>
+<li>封装基本的 Appium 操作，像<code>find_element</code>、<code>click_element</code>、<code>input_text</code>、<code>get_element_text</code>和<code>swipe</code>等操作</li>
+<li>创建<code>meichant</code>、<code>category</code>和<code>durgs</code>三个表，使用<code>Sqlite</code>保存对应数据</li>
+<li>支持流程中断后从中断出继续爬取，且一天之内只爬取一次<code>drugs</code>数据</li>
+<li>数据爬取完后直接生成<code>Excel</code>并作为邮件附件发送出去</li>
+</ul>
+<h4 id="AI-助力"><a href="#AI-助力" class="headerlink" title="AI 助力"></a>AI 助力</h4><p>我目前使用的是<a target="_blank" rel="noopener" href="https://www.trae.ai/">Trae</a>这个<code>IDE</code>来进行开发，虽然<code>Chat</code>模式访问比其他<code>AI</code>编辑器慢，但好在免费且能使用<code>Claude-3.5-Sonnet</code>这个<code>AI</code>模型，相比于其他模型<code>Claude</code>的模型的回答比较准确。</p>
+<p>以下是我用<code>AI</code>帮我做的事：</p>
+<ul>
+<li>帮我了解<code>Appium</code>的使用方式，方案细节等</li>
+<li>生成创建数据库表的 SQL，生成对应的<code>SQL</code>操作和单元测试</li>
+<li>封装基本常用的<code>Appium</code>页面元素操作，并优化<code>swipe</code>等操作细节</li>
+<li>发送流程细节来生成基础代码，虽然代码意图上并不完全符合我的意图</li>
+<li>导出<code>Excel</code>和发送<code>Email</code>操作，封装为工具类</li>
+</ul>
+<p>AI 基本伴随我整个开发过程，确确实实的提高了开发效率，按照工作日来算的话，总体花费大概五个工作日左右，如果没有<code>AI</code>的话可能多<code>2-3</code>个工作日。</p>
+<h4 id="最终方案"><a href="#最终方案" class="headerlink" title="最终方案"></a>最终方案</h4><p>因为外卖 App 涉及到多个，我这里把对应的 xpath 放到<code>config.json</code>里，每个端放置对应 xpath 集合，在程序中只要做一些兼容处理即可。</p>
+<p>整个处理流程如下：<br><img src="/../images/drugs-data-spider.gif" alt="image"></p>
+<h4 id="后续计划"><a href="#后续计划" class="headerlink" title="后续计划"></a>后续计划</h4><ul>
+<li>提供爬虫的多样性，实现 Web\H5 页面的数据爬取</li>
+<li>使用<code>Next.js</code>开发一个数据展示页面，提供简单的查询和排序操作</li>
+<li>使用<code>PyQt5</code>等开发一个可视化操作界面，让非开发人员也能操作使用</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>整体上来说<code>Appium</code> + <code>Python</code>这个方案可以说缺点都遇到了，环境配置多且繁琐，步骤复杂且耗时比较久，不能进行大批量且频繁的操作，为此我的两个账号还被官方重点照顾了，动不动就弹出验证弹框验证，不过好在我只需要一份参考数据。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%88%AC%E8%99%AB/" rel="tag"># 数据爬虫</a>
+              <a href="/tags/Appium/" rel="tag"># Appium</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/11/10/booslink-image-loader/" rel="prev" title="图片加载框架封装（Fresco和Glide）">
+      <i class="fa fa-chevron-left"></i> 图片加载框架封装（Fresco和Glide）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/12/booslink-gif-play-controll/" rel="next" title="低端设备上GIF依次播放实践">
+      低端设备上GIF依次播放实践 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%BE%E8%99%91"><span class="nav-number">1.</span> <span class="nav-text">顾虑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">技术选型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E6%AD%A5%E6%96%B9%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">初步方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AI-%E5%8A%A9%E5%8A%9B"><span class="nav-number">5.</span> <span class="nav-text">AI 助力</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E6%96%B9%E6%A1%88"><span class="nav-number">6.</span> <span class="nav-text">最终方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8E%E7%BB%AD%E8%AE%A1%E5%88%92"><span class="nav-number">7.</span> <span class="nav-text">后续计划</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

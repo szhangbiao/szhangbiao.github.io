@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="GIF 播放是我司应用市场类应用的一个重要的功能，之前做图片加载框架技术选型时也是以加载 GIF 的性能为基准来进行选择的，GIF 播放功能在手机端比较常见，通常交给支持 GIF 的图片加载框架处理就行，但是对于开发板端而言，这类功能对内存和 CPU 有较大的挑战，稍微不注意就很容易造成 ANR 和应用崩溃。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="低端设备上GIF依次播放实践">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/03/12/booslink-gif-play-controll/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="GIF 播放是我司应用市场类应用的一个重要的功能，之前做图片加载框架技术选型时也是以加载 GIF 的性能为基准来进行选择的，GIF 播放功能在手机端比较常见，通常交给支持 GIF 的图片加载框架处理就行，但是对于开发板端而言，这类功能对内存和 CPU 有较大的挑战，稍微不注意就很容易造成 ANR 和应用崩溃。">
+<meta property="og:locale">
+<meta property="og:image" content="https://szhangbiao.github.io/images/gif_play_framework.gif">
+<meta property="article:published_time" content="2025-03-12T02:06:49.000Z">
+<meta property="article:modified_time" content="2025-03-15T16:53:39.271Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="GIF播放">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://szhangbiao.github.io/images/gif_play_framework.gif">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/03/12/booslink-gif-play-controll/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>低端设备上GIF依次播放实践 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/03/12/booslink-gif-play-controll/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          低端设备上GIF依次播放实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-03-12 10:06:49" itemprop="dateCreated datePublished" datetime="2025-03-12T10:06:49+08:00">2025-03-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>GIF 播放是我司应用市场类应用的一个重要的功能，之前做图片加载框架技术选型时也是以加载 GIF 的性能为基准来进行选择的，GIF 播放功能在手机端比较常见，通常交给支持 GIF 的图片加载框架处理就行，但是对于开发板端而言，这类功能对内存和 CPU 有较大的挑战，稍微不注意就很容易造成 ANR 和应用崩溃。</p>
+<span id="more"></span>
+
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p><code>GIF</code>播放主要是为了更加生动的展示广告，吸引用户查看与点击，增加推荐位的曝光率等，属于我司规划了很久的一个功能，但是为了应对杂乱无章的满屏的<code>GIF</code>播放以及其带来的高内存和<code>CPU</code>高负载的挑战，<code>GIF</code>播放需加以控制使其顺序播放，同时，之前的性能优化在<code>Android 6.0</code>及以下使用<code>Fresco</code>加载，其它的使用<code>Glide</code>加载，这一情况更加增加了该功能的复杂性，再者图片的父容器中包含<code>RecyclerView</code>和<code>ViewPager</code>，也要兼顾触屏滑动时的用户体验。</p>
+<h3 id="构思与实现"><a href="#构思与实现" class="headerlink" title="构思与实现"></a>构思与实现</h3><p>整个流程分为辨别<code>GIF</code>、加入队列、确定顺序，播放控制、特殊情况处理、兼容性处理和其他的细节处理等步骤。</p>
+<h4 id="基本情况"><a href="#基本情况" class="headerlink" title="基本情况"></a>基本情况</h4><p>页面总体上的一个架构是<code>ViewPager</code>+<code>Fragemnts</code>的结构，每一个<code>Fragment</code>里是用<code>RecyclerView</code>展示的是类图片瀑布流，这是一种比较常见的平板或<code>TV</code>上的主页布局结构，其中部分位置根据后台数据的配置展示是<code>GIF</code>图片。当满足当前屏幕里的所有<code>GIF</code>都加载成功则开始按位置的顺序依次播放。</p>
+<h4 id="影响因素"><a href="#影响因素" class="headerlink" title="影响因素"></a>影响因素</h4><p>在<code>GIF</code>播放整个流程中涉及到很多影响<code>播放控制</code>的点，这里我们把它们一一列举出来：</p>
+<ul>
+<li><code>Fragment</code>的<code>onResume</code>、<code>onPause</code>和<code>onDestory</code>方法</li>
+<li><code>GIF</code>加载的的状态，像开始、成功和失败等状态</li>
+<li><code>ViewPager</code>和<code>RecyclerView</code>的滑动状态</li>
+<li>影响图片控件状态的<code>attachedToWindow</code>和<code>detachedFromWindow</code>方法</li>
+</ul>
+<p>以上这些点或推进或影响整体的<code>GIF</code>播放控制</p>
+<h4 id="代码封装"><a href="#代码封装" class="headerlink" title="代码封装"></a>代码封装</h4><p>根据以上列举的点，我们很轻易的得出播放控制的接口类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IGifPlayController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">pageResume</span><span class="params">(String pageId)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">pageResume</span><span class="params">(String pageId, RecyclerView recyclerView, <span class="type">boolean</span> turnBackFromSecondPage)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">pagePause</span><span class="params">(String pageId)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">pagePause</span><span class="params">(String pageId, RecyclerView recyclerView)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">pageDestroy</span><span class="params">(String pageId)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">notifyGifLoadStart</span><span class="params">(String uniqueTag, String gifUrl)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">notifyLoadSuccess</span><span class="params">(String uniqueTag, SimpleDraweeView imageView)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">notifyLoadSuccess</span><span class="params">(String uniqueTag, ImageView imageView, Bitmap firstFrame)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">notifyLoadFail</span><span class="params">(String uniqueTag)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">notifyScrollStateChanged</span><span class="params">(<span class="type">int</span> newState)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">attachToWindow</span><span class="params">(IMarketView marketView)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">attachToWindow</span><span class="params">(List&lt;IMarketView&gt; marketViews)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">detachFromWindow</span><span class="params">(String uniqueTag)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">detachFromWindow</span><span class="params">(List&lt;String&gt; uniqueTags)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>部分方法及参数说明：</p>
+<ul>
+<li><code>resume</code>和<code>pause</code>的两个方法分别对应可上下滑动的<code>Fragment</code>和整页显示的<code>Fragment</code></li>
+<li><code>uniqueTag</code>是在<code>Adapter</code>的<code>onBindViewHolder</code>方法里调用<code>View.setTag()</code>设置的，其中包含了<code>pageId</code>和<code>position</code>相对位置信息</li>
+<li><code>attachedToWindow</code>和<code>detachedFromWindow</code>的两个方法对应的则是<code>RecyclerView</code>里不同的<code>viewType</code>布局类型</li>
+<li><code>notifyScrollStateChanged</code>方法则只有<code>newState</code>等于<code>SCROLL_STATE_IDLE</code>时重新播放当前屏幕里展示的<code>GIF</code></li>
+</ul>
+<p>出于性能的考虑，目前加载<code>GIF</code>时先静态加载<code>GIF</code>的第一帧，等到真正的轮到当前<code>GIF</code>播放时再动态加载<code>GIF</code>并播放。<br>为此还定义了一个播放状态的实体类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GifPlayDTO</span> &#123;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> String uniqueTag;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> String gifUrl;</span><br><span class="line">    <span class="comment">// 用于GIF加载间隙图片闪烁问题</span></span><br><span class="line">    <span class="keyword">protected</span> Bitmap previousFrame;</span><br><span class="line">    <span class="keyword">protected</span> <span class="type">boolean</span> isDownloaded;</span><br><span class="line">    <span class="keyword">protected</span> <span class="type">boolean</span> isPlayed;</span><br><span class="line">    <span class="keyword">protected</span> <span class="type">boolean</span> isActive;</span><br><span class="line">    <span class="comment">// 根据 uniqueTag 得到相对位置，从而计算该控件是否完整的显示在屏幕中</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">tryPosition</span> <span class="operator">=</span> -<span class="number">1</span>;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于兼容性的处理则是根据<code>Fresco</code>和<code>Glide</code>的特性，分别实现<code>IGifPlayController</code>接口，虽然加载图片的 API 不一样，但总体流程的处理上是一致的。</p>
+<h4 id="简单图示"><a href="#简单图示" class="headerlink" title="简单图示"></a>简单图示</h4><p>当一个页面初次展示<code>GIF</code>时，<code>Controller</code>的大致处理流程和下图一致</p>
+<p><img src="/../images/gif_play_framework.gif" alt="image"></p>
+<p>虽然一些细节不能体现出来，但总体上还是可以的</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>其实使用<code>GIF</code>来展示动图并不是第一优选，像<code>Lottie</code>、<code>WebP</code>以及<code>SVGA</code>等都可以展示动图，之所以没有考虑这些方案有以下原因：</p>
+<ul>
+<li>没有相应的配套，需要设计和后端人员的支持，特别对设计的要求比较高</li>
+<li>国内公司的技术路径依赖，<code>GIF</code>播放是经过实践且成熟的方案，其它三个方案并没有在开发板上得到过验证，可能有兼容或其它的一些问题</li>
+<li>其它三个方案一样要做顺序播放控制，且不一定与现有方案兼容</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/GIF%E6%92%AD%E6%94%BE/" rel="tag"># GIF播放</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/02/python-appium-spider/" rel="prev" title="Appium + Python外卖医药数据爬取">
+      <i class="fa fa-chevron-left"></i> Appium + Python外卖医药数据爬取
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E6%80%9D%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">构思与实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%83%85%E5%86%B5"><span class="nav-number">2.1.</span> <span class="nav-text">基本情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BD%B1%E5%93%8D%E5%9B%A0%E7%B4%A0"><span class="nav-number">2.2.</span> <span class="nav-text">影响因素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%B0%81%E8%A3%85"><span class="nav-number">2.3.</span> <span class="nav-text">代码封装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%9B%BE%E7%A4%BA"><span class="nav-number">2.4.</span> <span class="nav-text">简单图示</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
