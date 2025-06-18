@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="几大主题，模块化，简洁代码，高质量开发，技术焦虑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="个人技术心得分享">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/04/22/booslink-technology-practice/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="几大主题，模块化，简洁代码，高质量开发，技术焦虑">
+<meta property="og:locale">
+<meta property="og:image" content="https://szhangbiao.github.io/images/app-framework-single-module.png">
+<meta property="og:image" content="https://szhangbiao.github.io/images/app-framework-simple-layer-module.png">
+<meta property="og:image" content="https://szhangbiao.github.io/images/app-framework-multi-module.png">
+<meta property="og:image" content="https://szhangbiao.github.io/images/modules-interactive.png">
+<meta property="og:image" content="https://szhangbiao.github.io/images/app-framework-multi-layer-module.png">
+<meta property="og:image" content="https://szhangbiao.github.io/images/quick-dev-workflow.gif">
+<meta property="og:image" content="https://szhangbiao.github.io/images/develop-content-model.gif">
+<meta property="og:image" content="https://szhangbiao.github.io/images/code-design-and-refactor.gif">
+<meta property="og:image" content="https://szhangbiao.github.io/images/high-quality-develop.png">
+<meta property="article:published_time" content="2025-04-22T12:11:31.000Z">
+<meta property="article:modified_time" content="2025-05-24T14:31:57.839Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="技术分享">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://szhangbiao.github.io/images/app-framework-single-module.png">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/04/22/booslink-technology-practice/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>个人技术心得分享 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/04/22/booslink-technology-practice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          个人技术心得分享
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-04-22 20:11:31" itemprop="dateCreated datePublished" datetime="2025-04-22T20:11:31+08:00">2025-04-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">经验总结</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>几大主题，模块化，简洁代码，高质量开发，技术焦虑</p>
+<span id="more"></span>
+
+<h3 id="问题点"><a href="#问题点" class="headerlink" title="问题点"></a>问题点</h3><ul>
+<li>新框架和技术落地的比较理想的时间节点</li>
+<li>当开发达到一定熟练度后，还能有什么追求</li>
+<li>除了完成需求之外，我们还能追求一点别的什么东西</li>
+<li>当应用达到性能瓶颈的时候，我们优先做哪些事</li>
+<li>为什么说技术只是工具，哪些能力是比较重要的</li>
+<li>一个项目周期迭代完，所有痛点都解决了吗，是否有更好的解决方案</li>
+</ul>
+<h3 id="模块化"><a href="#模块化" class="headerlink" title="模块化"></a>模块化</h3><p>模块化编程是一种软件设计技术，它强调将程序的功能分离为独立的、可互换的模块，使每个模块都包含执行所需功能的一个方面所必需的一切。</p>
+<p><strong>为什么要做模块化：</strong></p>
+<p>从工程化的手段上去解决</p>
+<ul>
+<li>模块代码复用与抽象问题</li>
+<li>编译速度问题（AS 和代码规模）</li>
+<li>日益增长的业务代码和版本迭代速度问题</li>
+</ul>
+<p><strong>模块化有哪些好处：</strong></p>
+<ul>
+<li>模块内的代码抽象与封装，代码重用、控制代码的可访问性等 （考虑模块间的数据交互）</li>
+<li>可使得项目架构比较清晰，模块（功能或业务）划分明确，便于团队成员维护</li>
+<li>将复杂问题拆解成多个小的、简单问题，采用分而治之的思想把复杂的问题简单化</li>
+<li>在一定程度上提高代码库的可维护性和项目整体质量</li>
+</ul>
+<p><strong>怎么做模块化：</strong></p>
+<p>以云青来应用市场的模块划分为例并结合个人的项目经历来演示下在模块化实践上的演变</p>
+<p><img src="/../images/app-framework-single-module.png" alt="image"></p>
+<ul>
+<li><code>Android</code>开发处于野蛮生长的时代，单一模块，开发模式主要是<code>MVC</code></li>
+<li>开发工具从<code>Eclipse</code>到<code>Android Studio</code>的过渡，异步编程也从<code>AsyncTask</code>和<code>Thread + Handler</code>到<code>RxJava</code>转变</li>
+<li><code>Android</code>团队的成员只有一个人，项目的规模偏中等</li>
+</ul>
+<p><img src="/../images/app-framework-simple-layer-module.png" alt="image"></p>
+<ul>
+<li>受到<code>简洁代码</code>和<code>架构分层</code>的思想的影响，对项目在工程化方面进行模块分层的改造</li>
+<li>简单的划分为<code>基础模块</code>、<code>业务模块</code>和<code>壳模块</code>，<code>基础模块</code>提供接口或者类直接供<code>业务模块</code>使用，<code>壳模块</code>则作为<code>App</code>的入口</li>
+<li><code>MVC</code>阶段：这个阶段相当于简版的<code>MVVM</code>，在<code>Activity</code>里写页面的业务逻辑，这也是后期阻碍版本迭代的原因之一</li>
+<li><code>MVVM</code>阶段：<code>jetpack</code>组件的初次尝试，没有很好的发挥<code>ViewModel</code>跟<code>LiveData</code>组合的作用，也感受到了<code>LiveData</code>的一些缺点</li>
+<li><code>Android</code>团队规模也始终保持在<code>1-2</code>个人</li>
+</ul>
+<p><img src="/../images/app-framework-multi-module.png" alt="image"></p>
+<ul>
+<li>更加细致地做模块划分然后为模块中的类添加<code>单元测试</code>，使用<code>Dagger2</code>框架来解决模块间通信问题</li>
+<li>注重代码质量与规范，<code>git</code>代码提交和<code>PR</code>代码合并等开发流程上的规范</li>
+<li><code>Android</code>团队人员增加到<code>3-5</code>个人</li>
+</ul>
+<p><strong>模块间的通信：</strong></p>
+<p><img src="/../images/modules-interactive.png" alt="image"></p>
+<ul>
+<li>模块之间的通信场景一般有两种，数据交互与页面跳转</li>
+<li>模块之间通信一般需要引入<strong>中介模块</strong>，有向下抽象和控制反转两种方式</li>
+<li>向下抽象是在<strong>基础依赖模块</strong>中定义模块通信接口和回调，对应模块实现相应接口和回调，另外<strong>基础依赖模块</strong>中还需要提供接口实现类的注册与接口查找功能的管理类</li>
+<li>控制反转则是对应模块定义接口与回调，在<strong>App 模块</strong>做所有的接口实现与回调，<strong>App 模块</strong>来组装各个业务模块的业务逻辑</li>
+</ul>
+<p><img src="/../images/app-framework-multi-layer-module.png" alt="image"></p>
+<ul>
+<li>使用<code>version.gradle</code>、<code>Maven BOM</code>或<code>catalog</code>等来统一各模块中依赖库的版本号</li>
+<li>使用<code>Gradle插件</code>来共享<code>build.gradle</code>中的构建逻辑和支持单一模块独立编译运行</li>
+</ul>
+<p><strong>更多需求：</strong></p>
+<ul>
+<li>基础模块逐渐臃肿的问题：<a target="_blank" rel="noopener" href="https://juejin.cn/post/6945413567285821453">Android 模块化之接口<code>API</code>化</a></li>
+<li>国际化问题：<a target="_blank" rel="noopener" href="https://blog.csdn.net/androiddevs/article/details/132913846">Android 模块化之多语言支持</a></li>
+<li>支持模块可插拔（插件化）：在单一模块支持可独立编译运行的前提下，可以根据配置随时插拔到宿主应用中</li>
+</ul>
+<p><strong>注意点：</strong></p>
+<ul>
+<li>没有必要为了模块化而模块化，在项目比较简单的情况下模块变多反而增加了维护成本</li>
+<li>模块的划分要注意划分的粒度，粒度太粗不能发挥模块化的优势，粒度太细则增加编译时间</li>
+<li>对于模块划分比较模糊的地带，不必纠结能够自圆其说就行，大多是凭借个人感觉</li>
+</ul>
+<h3 id="简洁代码"><a href="#简洁代码" class="headerlink" title="简洁代码"></a>简洁代码</h3><h4 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h4><p>作为一个开发，大多数的时间是跟代码打交道，有人说做程序开发就是写<code>Bug</code>和解<code>Bug</code>的这样一个循环的过程，仔细想想也确实是这样，在日常的版本迭代过程中，我们好像开启了一个循环一样，不断地重复写代码-&gt;改代码-&gt;验证大致这样一个过程，由于业务代码的不断膨胀和开发时间的紧迫，就致使开发人员在技术实现上往往选择最快速的方案，长此以往下来随着<strong>技术债</strong>不断的积累，后续迭代就会出现开发效率越来越低（阅读代码的时间长于开发时间），一些小的需求改动就会牵扯到大范围的代码改动，从而增加了这些改动引发的隐性<code>Bug</code>的担忧。</p>
+<p>业务急速增长：</p>
+<p>快速的迭代 -&gt; 代码量快速增长 -&gt; 代码越来越臃肿 -&gt; 陷入代码陷阱</p>
+<p><img src="/../images/quick-dev-workflow.gif" alt="image"></p>
+<p>技术债：</p>
+<ul>
+<li>开发时间短</li>
+<li>在没有完全理解需求的情况下就动手写代码</li>
+<li>一个迭代内需求频繁变动</li>
+</ul>
+<p>代码在迭代的过程中是会逐渐劣化的，模块化在一定程度上可以缓解这种情况。</p>
+<p>为了避免陷入越来越深的<strong>代码陷阱</strong>中，需要在开发流程上做出一些改变，比如在新功能的开发前做一些<strong>代码设计</strong>，对已有的臃肿的代码进行<strong>代码重构</strong>等手段，从而实现代码与代码之间那种干净清爽的分割效果，这种效果也称为<strong>简洁优雅的代码</strong>。</p>
+<h4 id="代码设计"><a href="#代码设计" class="headerlink" title="代码设计"></a>代码设计</h4><p>代码设计强调的是在开发前把对当前新功能或业务的理解进行梳理与思考，最终体现到后续开发的封装与抽象上，开发过程中随着对需求理解的进一步加深，持续的对当前的设计进行改进。<br>通用场景下的代码设计 - Java 的<code>23</code>种<strong>设计模式</strong>，以及设计模式的六大原则，有时候我们在代码实现的时候并不需要严格的遵从<strong>六大设计原则</strong>以及现有的<strong>设计模式</strong>，更像是我们在封装抽象后实现的某一设计模式的变种。<br>开发模式 - <code>Android</code>开发领域比较经典的<strong>开发模式</strong>（MVC、MVP 和 MVVM），应用层的开发内容占比也是遵从二八原则，基础的业务功能开发占了很大一部分比例，因此使用<strong>开发模式</strong>（模版代码）可以提高项目的容错率</p>
+<p><img src="/../images/develop-content-model.gif" alt="image"></p>
+<p>性能优化工作通常发生在系统运行稳定之后，针对出现的性能问题再进行优化，但是在手机性能过剩的时代，性能优化也不是必须的，在进行日常开发时遵从一些最佳的开发实践已经能开发出质量很高的应用了。</p>
+<h4 id="代码重构"><a href="#代码重构" class="headerlink" title="代码重构"></a>代码重构</h4><p>误区：代码重构是针对整个应用的重做，包括架构、技术选型、业务逻辑和<code>UI</code>都重新来一遍。<br>重构：对软件内部结构的一种调整，目的是在不改变软件可观察行为的前提下，提高其可理解性，降低其修改成本。</p>
+<p>重构的主要目的就是应对未来需求的改动，不管是可读性、可测试性、可维护性、可扩展性、设计良好或者代码质量高等等这些都是在未来需求改动时方便自己或者其他人在理解现有代码的基础上做出修改。</p>
+<p>可读性高的代码需不需要写<strong>注释</strong>？虽然说通过阅读代码能知道代码实现的意图，但是在业务开发上总有一些不能用代码表现的点，再加上如果是多人合作的项目，团队成员之间的水平高低不一，这种情况下项目文档和注释就很有必要了。</p>
+<p>下面是代码设计与重构在开发周期中的应用</p>
+<p><img src="/../images/code-design-and-refactor.gif" alt="image"></p>
+<h4 id="预期收益"><a href="#预期收益" class="headerlink" title="预期收益"></a>预期收益</h4><p>简洁优雅的代码带来的不仅仅是节约了开发时间</p>
+<ul>
+<li>维护成本低：对于一个长期需要维护的项目，它的维护成本肯定是高于开发成本，那这个项目代码的可读性和修改的难易程度就会在项目的迭代在开发效率、<code>Bug</code>定位和修复方面有很大的影响。</li>
+<li>提高性能：高质量的代码一般都会遵循最佳实践，意味着在技术实现上会采用更高效的算法、更少的冗余操作和合理的资源使用。</li>
+<li>心理健康：在优质的项目上工作可以提高心情的愉悦度和工作的积极性,所有流程执行起来都比较顺风顺水,主打开开心心工作，与之相反的情况则是比较容易陷入技术纠结与自我怀疑当中。</li>
+<li>价值实现：良好的技术氛围、技术实现的满足感、工作的成就感，项目的价值提升带来的正向的反馈。</li>
+</ul>
+<h4 id="如何开始"><a href="#如何开始" class="headerlink" title="如何开始"></a>如何开始</h4><p>跟掌握一份新技能过程差不多，整体流程上就是<strong>学习 -&gt; 模仿实践 -&gt; 创新</strong></p>
+<ul>
+<li>学习：文档、博客、书籍或源码</li>
+<li>实践：主动在新项目中应用或者有机会参与到代码质量比较优秀的项目中来</li>
+<li>创新：在有了实践的基础上做一些微创新，比如写的框架提高了开发效率，减少了应用交付的时间等等。</li>
+</ul>
+<p>在看完一篇博客或者读完一本书的后并没有感觉到有所提升，只是增加了理论上的知识，只有在具体实践或者经历类似的项目才能有一些深刻的体会，学习的知识或经历会对你产生一些潜移默化的影响，帮助你在后续的编程时形成一些良好的习惯，就比如说我在看<strong>重构</strong>相关的书籍之前并不知道“代码设计是你对业务逻辑的抽象和封装，重构是你在实现代码时追求高可读性的过程”，我仅仅是按照自己的习惯在做事罢了。</p>
+<p>团队协作：有的公司都有一套机制避免技术债的持续积累，比如团队共识、编程规范和代码提交规范等，使用单元测试和自动化测试、代码扫描工具、<code>Code Review</code>和<code>CI/CD</code>，这些工具或者方法可以提升项目代码质量的下限。</p>
+<h4 id="反面案例"><a href="#反面案例" class="headerlink" title="反面案例"></a>反面案例</h4><p>背景：创业项目，功能多、时间紧和人员有限（人员中途替换），<code>Android</code>端优先级低<br>接手时现状：</p>
+<ul>
+<li>一个人接手三个风格各异的代码，模块间代码耦合严重，代码逻辑混乱</li>
+<li>所有代码都在<code>app</code>模块下，项目结构组织混乱，也没有代码分层的概念</li>
+<li>项目复杂度以及代码量都已达到一定量级，后期迭代时间紧张，没有时间去重构</li>
+</ul>
+<p>后续遇到的问题：</p>
+<ul>
+<li>尝试对某些模块进行重构，但都因为耦合严重，做了很多无用功，还因此耽误了正常的开发时间</li>
+<li>版本的迭代过程中经常出现解决一个问题引发更多问题的现象，一度陷入自我怀疑的困境当中</li>
+<li>前期技术选型问题导致后期技术栈难以升级，某一时间段内陷入技术纠结当中</li>
+</ul>
+<p>项目经验：</p>
+<ul>
+<li>项目重构是团队自上而下的事情，没有领导层面的支持，尽量不要有任何改进代码的想法，代码能跑起来就不要去动它</li>
+<li>针对时间紧任务重的项目，为了产品的交付有时是可以暂时把技术细节忽略，但是后期有时间一定拾起来，不然项目后期维护很困难</li>
+<li>为了项目的稳定性，尽量不要有人员变动，如果无法避免就要求开发人员做好注释与项目文档</li>
+</ul>
+<h3 id="高质量开发"><a href="#高质量开发" class="headerlink" title="高质量开发"></a>高质量开发</h3><p>性能问题是一个应用在业务规模或者用户体量达到一定量级的时候必然出现的问题，较轻的症状则是启动时间长、页面打开慢、页面数据加载慢和长时间使用手机发烫等，严重的像崩溃、卡死、白屏等，解决性能问题需要从崩溃、内存、卡顿、启动、安装包大小等方面来进行优化，作为开发我们也能从解决这些问题的过程中获得成长。</p>
+<p><img src="/../images/high-quality-develop.png" alt="image"></p>
+<h4 id="内存优化"><a href="#内存优化" class="headerlink" title="内存优化"></a>内存优化</h4><p>内存优化的主要思想就是<strong>用时申请，及时回收</strong>，这个是我们在做架构设计的时候时刻注意的点</p>
+<ul>
+<li>设备分级：低端机上关闭复杂动画、使用<code>565</code>格式图片、使用更小的缓存内存以及在<code>OnTrimMemory</code>回调时清理缓存内存，减少应用启动进程数、常驻进程和有节制的进行保活，推出针对性的<code>轻量版</code>应用</li>
+<li><code>Bitmap</code>优化：统一图片库，收拢<code>Bitmap.createBitmap</code>、<code>BitmapFactory</code>相关接口，大图片、重复图片和图片总内存等监控。</li>
+<li>内存泄漏：常规的造成内存泄漏的方式有单例使用泛滥、资源或者对象没有及时回收、<code>Handler</code>或线程使用不当等，这些问题可以通过优秀的架构设计避免，也可以使用<code>LeakCanary</code>、<code>Profiler</code>或者<code>MAT</code>等工具分析内存使用情况。</li>
+</ul>
+<h4 id="启动优化"><a href="#启动优化" class="headerlink" title="启动优化"></a>启动优化</h4><p>应用启动优化主要针对冷启动，启动过程主要有<code>Launcher</code>点击应用图标 -&gt; 加载空白<code>Window</code> -&gt; 创建进程 -&gt; 创建<code>Application</code> -&gt; 启动线程 -&gt; 创建入口<code>Activity</code> -&gt; 显示首屏页面这个整体的过程</p>
+<ul>
+<li>闪屏优化：使用一张和闪屏页一样的图片设置为主题背景</li>
+<li>业务梳理与优化：启动过程中精简业务逻辑、移除或懒加载部分模块和三方<code>SDK</code>延迟或者异步初始化，精简首屏页面的复杂度等</li>
+<li>线程优化：统一线程池，根据机器性能控制线程数量以减少<code>CPU</code>调度带来的波动，避免出现高优先级的线程等待低优先级线程的情况</li>
+<li>进阶优化：<code>I/O</code>优化、类重排、资源文件重排和类加载过程中去除<code>verify</code>过程</li>
+<li>黑科技：保活、插件化和热修复</li>
+</ul>
+<h4 id="网络优化"><a href="#网络优化" class="headerlink" title="网络优化"></a>网络优化</h4><p>网络优化主要从速度、弱网和安全方面优化，此外还要考虑网络请求造成的耗电和流量问题，一个完整的网络请求包含<code>DNS</code>解析、创建连接、发送&#x2F;接收数据和关闭连接。</p>
+<ul>
+<li><code>DNS</code>优化：使用<code>IP</code>或<code>IP</code>池直连，避免<code>DNS</code>解析</li>
+<li>连接复用：<code>OkHttp</code>的连接复用机制，避免重复创建连接</li>
+<li>传输过程：<code>Gzip</code>压缩、<code>Protocol Buffer</code>和数据加密等</li>
+<li>业务层面：接口设计和数据缓存来降低请求频次、弱网情况下接口请求重试与分优先级和监听网络状态不同情况采用不同的请求策略等。</li>
+</ul>
+<h4 id="UI渲染优化"><a href="#UI渲染优化" class="headerlink" title="UI渲染优化"></a><code>UI</code>渲染优化</h4><p><code>UI</code>开发是我们做<code>基础业务</code>开发的最重要的部分，也是需求变动最频繁的部分，同样的<code>UI</code>优化页也是卡顿优化的一个重要的子集</p>
+<ul>
+<li>布局优化：使用<code>viewstub</code>或<code>merge</code>标签减少布局嵌套，避免重复的背景设置防止过度绘制，优先使用高性能的<code>ViewGroup</code>比如<code>ConstraintLayout</code></li>
+<li>创建优化：使用代码来代替<code>xml</code>创建布局，使用<code>View</code>缓存池来达到跨<code>Activity</code>或<code>Fragment</code>的复用，异步创建等</li>
+<li>进阶手段：<code>Facebook</code>开源的<code>UI</code>渲染框架<code>Litho</code>和使用<code>skia</code>引擎接管系统渲染的<code>flutter</code>等</li>
+</ul>
+<h4 id="安装包优化"><a href="#安装包优化" class="headerlink" title="安装包优化"></a>安装包优化</h4><p>安装包大小对应用的性能也有一定的影响，比如应用的安装时间、运行时的内存占用和安装后的<code>ROM</code>空间占用等</p>
+<ul>
+<li>只使用一套设计图（xhdpi - 720p），使用<code>lint</code>定期清理无用的代码和资源</li>
+<li>使用图片压缩工具对项目内的大图进行有损压缩,一些非透明大图使用<code>jpg</code>格式</li>
+<li>使用网络图片，使用<code>shape</code>或<code>selector</code>代替一些纯色或渐变的图片，使用.9 图、矢量图或<code>webp</code>等格式的图片</li>
+<li>删除<code>x86</code>或<code>armable-v7</code>下的<code>so</code>库或删除无用的语言资源</li>
+<li>混淆代码:添加<code>proguard rules</code>配置并开启<code>minifyEnabled</code>和<code>shrinkResources</code>设置，使用<code>AndResGuard</code>对资源进行压缩与混淆</li>
+<li>支持插件化</li>
+</ul>
+<p>性能优化的主要解决思路还是要从<strong>架构</strong>和<strong>监控</strong>两方面入手，打造良好的<strong>架构</strong>需要一定的项目积累，<strong>监控</strong>则需要在出现具体的性能问题时使用对应的性能分析工具去处理，这样的话性能优化的处理就有<strong>发现问题前</strong>和<strong>发现问题后</strong>两种场景，所以在日常开发中我们可以先从遵循最佳实践开始。</p>
+<h3 id="技术焦虑"><a href="#技术焦虑" class="headerlink" title="技术焦虑"></a>技术焦虑</h3><p>现在<code>Android</code>的开发体系现在已经十分成熟了，最新的开发技术有<code>MVVM</code>开发模式，基于<code>Jetpack</code>的<code>AAC</code>架构，<code>Kotlin</code>、<code>协程</code>、<code>Compose</code>等等并且这一套技术栈已经存续了相当长的时间，因为旧项目的维护或者工作环境的影响，很多时候没有新框架落地的条件，这让我们在面对新生框架和技术不断迭代的大环境下，对于新技术的无法落地到项目中而感到焦虑，时常处于一种“还没用过“的不安之中。</p>
+<p>正确的应对<code>技术焦虑</code>的思路是：没有条件落地，但是可以去尝试理解这个新框架或技术的本质是什么，从而缓解对未知的恐惧。真正厉害的是造<code>轮子</code>的人而不是使用<code>轮子</code>的人，我们可以广泛的学习新技术，但是切勿陷入对技术的狂热，没有需求和场景的情况下，盲目的技术深入大多数是在浪费时间，不如把时间花在真正需要提升的地方。</p>
+<p>开发并不只是写代码，而是一个综合的能力，是需要时间慢慢去养成和踩坑来得到</p>
+<p><strong>开发层面：</strong></p>
+<ol>
+<li>沟通的能力</li>
+<li>独立解决问题的能力</li>
+</ol>
+<ul>
+<li>快速学习</li>
+<li>在（ctrl+c 和 ctrl+v）的基础上一定的创新的能力</li>
+</ul>
+<ol start="3">
+<li>好奇心</li>
+<li>英语</li>
+</ol>
+<p><strong>行业沉淀：</strong></p>
+<ol>
+<li>业务需求快速落地需要长期的经验积累</li>
+<li>工作流程的改进，更好的进行团队协作</li>
+<li>每做完一个项目，一些用着不顺手或者有瑕疵的地方都是可以提高的部分</li>
+</ol>
+<p><strong>工作效率:</strong></p>
+<p>习惯的培养、保持专注、提前规划、大任务拆分（看得到的进度）<br>工作内容大部分场景是重复且朴素的，思考能不能通过<code>AI</code>来提高这块工作内容的效率<br>人不是机器，要给自己留一些思考与总结的时间</p>
+<p><strong>工作之外:</strong></p>
+<p>身体健康、家庭、个人交际或爱好，培养一些习惯等</p>
+<h3 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h3><ul>
+<li>付费课：极客时间 - Android 高手开发课</li>
+<li>书籍：重构 - 改善既有代码的设计</li>
+</ul>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>模块化文章：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/android/nowinandroid">nowinandroid</a></li>
+<li><a target="_blank" rel="noopener" href="https://juejin.cn/post/7142884855091560479">Android 官方模块化方案解读</a></li>
+<li><a target="_blank" rel="noopener" href="https://juejin.cn/post/6993951889410752519">Android 模块化知识分享</a></li>
+<li><a target="_blank" rel="noopener" href="https://juejin.cn/post/7248606482026725434">组件化与模块化的抉择</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/6Q818XA5FaHd7jJMFBG60w">微信 Android 模块化架构重构实践</a></li>
+</ul>
+<p>图表制作：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://app.diagrams.net/">DrawIO Web 版</a></li>
+<li><a target="_blank" rel="noopener" href="https://inscribed.app/">Incribed 类<code>PPT</code>图表</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" rel="tag"># 技术分享</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/29/books-softskill-review/" rel="prev" title="软技能-代码之外的生存指南读后感">
+      <i class="fa fa-chevron-left"></i> 软技能-代码之外的生存指南读后感
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/05/android-anr-optimize/" rel="next" title="Android 性能优化之卡顿优化">
+      Android 性能优化之卡顿优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">问题点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">模块化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E6%B4%81%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">简洁代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">3.1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.2.</span> <span class="nav-text">代码设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E9%87%8D%E6%9E%84"><span class="nav-number">3.3.</span> <span class="nav-text">代码重构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%84%E6%9C%9F%E6%94%B6%E7%9B%8A"><span class="nav-number">3.4.</span> <span class="nav-text">预期收益</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%BC%80%E5%A7%8B"><span class="nav-number">3.5.</span> <span class="nav-text">如何开始</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8D%E9%9D%A2%E6%A1%88%E4%BE%8B"><span class="nav-number">3.6.</span> <span class="nav-text">反面案例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E8%B4%A8%E9%87%8F%E5%BC%80%E5%8F%91"><span class="nav-number">4.</span> <span class="nav-text">高质量开发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96"><span class="nav-number">4.1.</span> <span class="nav-text">内存优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">启动优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E4%BC%98%E5%8C%96"><span class="nav-number">4.3.</span> <span class="nav-text">网络优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UI%E6%B8%B2%E6%9F%93%E4%BC%98%E5%8C%96"><span class="nav-number">4.4.</span> <span class="nav-text">UI渲染优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%8C%85%E4%BC%98%E5%8C%96"><span class="nav-number">4.5.</span> <span class="nav-text">安装包优化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E7%84%A6%E8%99%91"><span class="nav-number">5.</span> <span class="nav-text">技术焦虑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90"><span class="nav-number">6.</span> <span class="nav-text">推荐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

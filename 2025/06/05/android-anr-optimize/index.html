@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="目前所开发的应用是在开发板上的一款应用市场类应用，设备主要涉及到拉杆音响和电视盒子两类，其中拉杆音响的设备性能要略好于电视盒子类的设备，年初应用在添加了一些高级功能比如GIF轮播这类对性能比较有挑战的功能后，在上述两类系统和性能排名较低的设备上暴力测试和Monkey测试时有较大的概率发生ANR，加上平时打开一些比较复杂页面的响应速度也比较堪忧，于是就开启了一系列优化的过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 性能优化之卡顿优化">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/06/05/android-anr-optimize/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="目前所开发的应用是在开发板上的一款应用市场类应用，设备主要涉及到拉杆音响和电视盒子两类，其中拉杆音响的设备性能要略好于电视盒子类的设备，年初应用在添加了一些高级功能比如GIF轮播这类对性能比较有挑战的功能后，在上述两类系统和性能排名较低的设备上暴力测试和Monkey测试时有较大的概率发生ANR，加上平时打开一些比较复杂页面的响应速度也比较堪忧，于是就开启了一系列优化的过程。">
+<meta property="og:locale">
+<meta property="og:image" content="https://szhangbiao.github.io/images/home-page-prototype.png">
+<meta property="article:published_time" content="2025-06-05T05:12:31.000Z">
+<meta property="article:modified_time" content="2025-06-11T13:55:07.528Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="UI卡顿">
+<meta property="article:tag" content="ANR优化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://szhangbiao.github.io/images/home-page-prototype.png">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/06/05/android-anr-optimize/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>Android 性能优化之卡顿优化 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/06/05/android-anr-optimize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android 性能优化之卡顿优化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-06-05 13:12:31" itemprop="dateCreated datePublished" datetime="2025-06-05T13:12:31+08:00">2025-06-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>目前所开发的应用是在<code>开发板</code>上的一款<code>应用市场</code>类应用，设备主要涉及到<strong>拉杆音响</strong>和<strong>电视盒子</strong>两类，其中拉杆音响的设备性能要略好于电视盒子类的设备，年初应用在添加了一些<strong>高级功能</strong>比如<code>GIF轮播</code>这类对性能比较有挑战的功能后，在上述两类系统和性能排名较低的设备上暴力测试和<code>Monkey</code>测试时有较大的概率发生<code>ANR</code>，加上平时打开一些比较复杂页面的响应速度也比较堪忧，于是就开启了一系列优化的过程。</p>
+<span id="more"></span>
+
+<h3 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h3><p>从设备的表现上来看，产生<code>UI</code>卡顿甚至<code>ANR</code>的原因有两个层面，一个是系统层面，出现<code>ANR</code>的设备主要集中在<code>Android 4.4</code>这一系统上，再加上硬件参数相对较低，就会出现即使不运行任何应用仅停留在桌面，通过<code>logcat</code>也可以看到一些系统的进程在不断地进行<code>GC</code>，另一个是应用层面，面对这类设备情况，常规的开发手段显然不能有很好的表现，再加上一些<code>API</code>在使用上不严谨就更加加剧了卡顿的情况。</p>
+<p>面对这些情况，系统层面我们肯定没法干预，虽然我司在系统固件定制方面有一些业务和经验，但显然不会单独为了这一两类设备去单独做优化，那我们只能从应用层面着手，采用一些非常规的开发手段，比如统一图片库、统一线程池、限制线程数、设备分级处理、使用代码代替<code>xml</code>创建布局、优化列表数据加载、<code>View</code>缓存复用和异步加载等等，其中一些手段我们在日常开发时就已经考虑到了，今天我们就来详细说说部分优化手段的实现以及优化后的效果。</p>
+<p>要想知道优化的手段有没有起到效果就需要有优化前后的数据对比，首先想到的是统计<code>Activity/Fragment</code>的生命周期方法的执行时间，本身应用的页面架构采用的是<code>单Activity + Fragments</code>，路由则是使用<code>Jetpack</code>中的<code>Navigation</code>，所以我们实现一个继承<code>FragmentLifecycleCallbacks</code>的类，在其中的回调中统计<code>Fragment</code>的生命周期的方法执行时间即可。</p>
+<h3 id="XML-转-Code"><a href="#XML-转-Code" class="headerlink" title="XML 转 Code"></a>XML 转 Code</h3><p>以下是在<code>Fragment</code>的生命周期中结合业务的伪代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Fragment lifecycle methods</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(<span class="meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;</span><br><span class="line">    <span class="comment">// 初始化 ViewModel</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> View <span class="title function_">onCreateView</span><span class="params">(<span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@Nullable</span> ViewGroup container, <span class="meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;</span><br><span class="line">    <span class="type">View</span> <span class="variable">inflatedView</span> <span class="operator">=</span> inflater.inflate(R.layout.fragment_xxxx, container, <span class="literal">false</span>);</span><br><span class="line">    <span class="keyword">return</span> inflatedView;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onViewCreated</span><span class="params">(<span class="meta">@NonNull</span> View view, <span class="meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;</span><br><span class="line">    <span class="comment">// 1. ViewBinding bind view</span></span><br><span class="line">    <span class="comment">// 2. 初始化views的页面数据跟事件</span></span><br><span class="line">    <span class="comment">// 3. 对ViewModel中对应数据的LiveData设置观察者</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onResume</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 调用ViewMode中的方法请求页面数据</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是封装的通用的页面逻辑处理过程，观察在<code>FragmentLifecycleCallbacks</code>的回调方法中打印生命周期方法的执行时间，在性能比较差的设备上且页面布局稍微复杂一点的时候，可以发现<code>onCreateView</code>的执行时间普遍在<code>200ms</code>左右，这还是我们在布局结构上只使用<code>ConstraintLayout</code>防止布局嵌套和优化过度绘制之后的数据表现，为了进一步提升性能，因此有了把<code>XML</code>布局转<code>Java</code>代码实现的尝试。</p>
+<p>把<code>XML</code>布局转换成<code>Java</code>代码实现是一种常见的优化手段，我们都知道<code>xml</code>布局在<code>inflate</code>的过程中会涉及到大量的<code>IO</code>和反射，这也就成为了低端机上的性能瓶颈之一，在最开始的阶段有想过寻找一些成熟的框架来解决这一问题，其中比较有影响力的像<a target="_blank" rel="noopener" href="https://github.com/iReaderAndroid/X2C">X2C</a>框架，但是这个框架已经很久没有更新了，最新的<code>Android Stuido</code>已经不能引入改库了，我也有想过阅读<a target="_blank" rel="noopener" href="https://github.com/iReaderAndroid/X2C">X2C</a>源码并仿写一个适用最新的<code>Android Stuido</code>的版本，直到后续读到<a target="_blank" rel="noopener" href="https://github.com/didi/booster">Booster</a>作者的博客才打消了这一念头，这个大佬最初也有过这一想法，因为官方的<code>Compose</code>出来之后就放弃了，<code>View</code>体系后面也会成为历史产物，继续在上面折腾是没有太大的意义的。</p>
+<p>后续功能的实现也只剩<strong>手搓</strong>这一选项了，手搓的伪代码大致如下：</p>
+<p><strong>首先是创建类：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XXXLayoutCreator</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 成员对象是XML中的View</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> XXXLayoutCreator <span class="title function_">create</span><span class="params">(Context context)</span>&#123;</span><br><span class="line">        <span class="number">1.</span> 创建ConstraintLayout父布局</span><br><span class="line">        <span class="number">2.</span> 根据XML里View的顺序创建View并添加到ConstraintLayout中</span><br><span class="line">        <span class="number">3.</span> 使用`ConstraintSet`设置各个View的约束</span><br><span class="line">        <span class="number">4.</span> 返回XXXLayoutCreator对象</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> View <span class="title function_">getRoot</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mConstraintLayout;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在<code>Fragment</code>中改动:</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">XXXFragment</span> <span class="keyword">extends</span> <span class="title class_">BaseFragment</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">boolean</span> <span class="variable">isUseCreateView</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> FragmentXXXBinding mBinding;</span><br><span class="line">    <span class="keyword">private</span> XXXLayoutCreator mCreator;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">XXXFragment</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>(R.layout.fragment_xxx);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> View <span class="title function_">onCreateView</span><span class="params">(<span class="meta">@NonNull</span> LayoutInflater inflater, <span class="meta">@Nullable</span> ViewGroup container, <span class="meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (isUseCreateView) &#123;</span><br><span class="line">            mCreator = XXXLayoutCreator.create(requireContext());</span><br><span class="line">            <span class="keyword">return</span> mCreator.getRoot();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">super</span>.onCreateView(inflater, container, savedInstanceState);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onViewCreated</span><span class="params">(<span class="meta">@NonNull</span> View view, <span class="meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onViewCreated(view, savedInstanceState);</span><br><span class="line">        <span class="keyword">if</span>(!isUseCreateView)&#123;</span><br><span class="line">            mBinding = FragmentXXXBinding.bind(view);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 为各种View定义get方法</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> TextView <span class="title function_">getTitleView</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> isUseCreateView ? mCreator.getTitleView() : mBinding.tvTitle;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之所以使用一个开关保留<code>XML</code>布局主要有如下考虑：</p>
+<ul>
+<li><code>XML</code>布局适配了三套设计图，是经过测试验证过的，使用代码实现某些细节有可能会有所遗漏</li>
+<li>更加容易定位问题，后续遇到相关<code>Bug</code>可以方便切换<code>XML</code>布局和<code>Java</code>布局，做一定的问题排查</li>
+<li>方便维护，不管后续代码谁来维护，直接面对一堆代码肯定会略感无力，保留<code>XML</code>布局可以多一分参考</li>
+</ul>
+<p>面对项目里众多的<code>XML</code>布局，一一转换的过程枯燥且费时，好在我们在创建各类<code>XXXLayoutCreator</code>的过程中使用<a target="_blank" rel="noopener" href="https://www.trae.ai/">Trae</a>这个<strong>AI IDE</strong>工具来帮助我们提升转换的效率，主要思路是让它参考已经转换好的<code>XML</code>文件和<code>Java</code>文件，然后根据<code>XML</code>文件自动创建对应的<code>Java</code>文件，生成的<code>Java</code>文件略加修改即可直接使用，整个过程中大概节约了**30%**的时间。</p>
+<p>在实现<code>XML</code>转<code>Code</code>这一优化后，同一页面<code>onCreateView</code>的执行时间优化到<code>100ms</code>以内，虽然没有达到有些博客里介绍的<strong>20 倍</strong>的优化效果，但也很不错了。</p>
+<h3 id="RecyclerView数据加载"><a href="#RecyclerView数据加载" class="headerlink" title="RecyclerView数据加载"></a><code>RecyclerView</code>数据加载</h3><p>项目里使用<code>RecyclerView</code>的页面比较多，虽然我把列表里<code>Item</code>的布局也转换为<code>Java</code>代码实现，但是在页面创建和销毁比较高频的场景下还是偶尔会发生<code>ANR</code>，使用内存分析工具也没有发现内存泄漏的地方，进一步的优化场景就只有<code>mAdapter.notifyDataSetChanged()</code>的使用了。</p>
+<p>首先把出现问题的场景交代一下，这个页面是应用的主页，页面采用<code>TabLayout</code>+<code>ViewPager</code>+<code>Fragments</code>的结构，是一种比较典型的<code>TV</code>类布局结构，原型图大致如下：</p>
+<p><img src="/../images/home-page-prototype.png" alt="image"></p>
+<p>使用<strong>遥控器</strong>在<code>TabLayout</code>中快速切换<code>Tab</code>时，会造成<code>Fragment</code>下的<code>View</code>频繁的创建与销毁，而且页面在<strong>数据加载中</strong>这一状态时我们构建了一个<code>无内容</code>的数据列表去填充<code>RecyclerView</code>以达到提前预览的效果，这就导致了在数据显示到屏幕上时已经调用了两次<code>notifyDataSetChanged()</code>，对象的频繁创建与销毁会导致内存抖动，这是导致该场景下<code>ANR</code>发生的根本原因。</p>
+<p>解决思路主要有以下尝试：</p>
+<ul>
+<li>在<code>TabLayout</code>切换时加<strong>防抖</strong>功能，避免过快切换<code>Fragment</code></li>
+<li>移除<code>notifyDataSetChanged()</code>方法的使用，使用<code>notifyItemRangeXXX</code>或者<code>DiffUtil</code>去替代</li>
+<li>跨页面使用<code>RecyclerViewPool</code>来复用同类型的<code>RecyclerView</code>下的<code>ViewHolder</code></li>
+<li>使用对象池来缓存和复用一些创建时损耗或占用资源比较大的对象</li>
+</ul>
+<p>对于第二点我后续使用<code>DiffUtil</code>来替代<code>notifyDataSetChanged()</code>的使用，在使用细节上首先有根据<code>AsyncListDiffer</code>来封装自己的<code>BaseAdapter</code>，只不过在构造方法里初始化<code>AsyncListDiffer</code>对象时使用一个共享的<code>ThreadPool</code>静态变量来做<code>DiffUtil</code>内部异步数据对比，其次是页面<code>加载中</code>状态下构造无实际内容的数据时根据单个数据在列表中的位置赋予该数据一个唯一<code>id</code>，在真实数据到来时也进行这一过程，这样在<code>DiffUtil.ItemCallback</code>下的<code>areItemsTheSame</code>中使用该<code>id</code>来做比较可以保证页面状态变化后，<code>Adapter</code>不会执行两次<code>onCreateViewHolder</code>，当然这一细节只有该场景下才适用。</p>
+<p>第三点其实很早之前就用了，只不过在使用<code>Glide</code>加载的场景下一直报错，使用<code>Fresco</code>加载的时候不会出现这一问题，后续找到原因是我在<code>ViewHolder</code>里持有了<code>Fragment</code>的对象，其主要用于图片加载时传入，这样该图片的资源就跟<code>Fragment</code>的生命周期绑定，但是在<code>ViewPager</code>+<code>Fragments</code>的场景下，复用同类型的<code>ViewHolder</code>就会出现<code>ImageView</code>使用已经回收的<code>Bitmap</code>的异常，后续是在<code>onBindViewHolder</code>时<code>Fragment</code>作为方法参数传入<code>ViewHolder</code>中使用才解决这一问题。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>以上优化方法的应用，总体上使得<code>ANR</code>的情况得到控制，如果不是以上很多因素叠加到一起可能就不会出现<code>ANR</code>的问题，卡顿优化也是要具体问题具体分析，必要时使用一些工具，最近听说字节的<code>btrace</code>最新版的工具快要发布了，后续肯定要在项目里尝试一波。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/UI%E5%8D%A1%E9%A1%BF/" rel="tag"># UI卡顿</a>
+              <a href="/tags/ANR%E4%BC%98%E5%8C%96/" rel="tag"># ANR优化</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/22/booslink-technology-practice/" rel="prev" title="个人技术心得分享">
+      <i class="fa fa-chevron-left"></i> 个人技术心得分享
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">问题分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XML-%E8%BD%AC-Code"><span class="nav-number">2.</span> <span class="nav-text">XML 转 Code</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RecyclerView%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD"><span class="nav-number">3.</span> <span class="nav-text">RecyclerView数据加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

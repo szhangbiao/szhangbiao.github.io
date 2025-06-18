@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="该篇章是我通读“软技能-代码之外的生存指南”这本书后的对于每个章节的简短概括，用于后续重复阅读时的参考，也可以当做回顾时的快速索引。当前做笔记时已经是我第三次读这本书，给了我很多的启发跟方向。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软技能-代码之外的生存指南概括">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/03/23/books-softskill-summary/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="该篇章是我通读“软技能-代码之外的生存指南”这本书后的对于每个章节的简短概括，用于后续重复阅读时的参考，也可以当做回顾时的快速索引。当前做笔记时已经是我第三次读这本书，给了我很多的启发跟方向。">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-03-23T02:50:30.000Z">
+<meta property="article:modified_time" content="2025-03-26T15:18:18.304Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="软技能">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/03/23/books-softskill-summary/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>软技能-代码之外的生存指南概括 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/03/23/books-softskill-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软技能-代码之外的生存指南概括
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-03-23 10:50:30" itemprop="dateCreated datePublished" datetime="2025-03-23T10:50:30+08:00">2025-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>该篇章是我通读“软技能-代码之外的生存指南”这本书后的对于每个章节的简短概括，用于后续重复阅读时的参考，也可以当做回顾时的快速索引。当前做笔记时已经是我第三次读这本书，给了我很多的启发跟方向。</p>
+<span id="more"></span>
+
+<h3 id="章节总结"><a href="#章节总结" class="headerlink" title="章节总结"></a>章节总结</h3><p>第一章：</p>
+<p><strong>与常规软件开发书籍不同</strong></p>
+<ul>
+<li>本书旨在告诉你“如何成为⼀名优秀的软件开发⼈员”，是那些能够把控⾃⼰的职业⽣涯、达成⽬标、享受⽣活的⼈</li>
+<li>思索：作为一名软件开发⼈员如何超越编写代码本⾝</li>
+</ul>
+<p>第二章：</p>
+<p><strong>从非同凡响开始</strong></p>
+<ul>
+<li>把职业当做企业来经营</li>
+<li>改善自己的工作方式、财务处理方式、新工作或新客户的需求方式</li>
+</ul>
+<p>第三章：</p>
+<p><strong>思考未来</strong></p>
+<ul>
+<li>为职业生涯设置至少一个大的目标</li>
+<li>目标分解成 月度、周、每日目标，小步前进。</li>
+<li>把大目标放置在每日可见之处，时刻提醒自己在追求什么</li>
+</ul>
+<p>第四章：</p>
+<p><strong>人际交往很重要</strong></p>
+<ul>
+<li>提高自己人际交往的能力</li>
+<li>提高口头表达能力</li>
+<li>安静的写代码虽然安逸但是不能带来好处</li>
+</ul>
+<p>第五章：</p>
+<p><strong>面试之道</strong></p>
+<ul>
+<li>真正的面试开始于面试之前（个人营销、面试官从某些渠道知道你）</li>
+<li>内部推荐好于社会招聘（人际关系带来的边际效应）</li>
+<li>即使不换工作也要去面试，获取面试经验</li>
+</ul>
+<p>第六章：</p>
+<p><strong>就业选择</strong></p>
+<ul>
+<li>雇员、咨询师、创业者（程序员的选择）</li>
+</ul>
+<p>第七章：</p>
+<p><strong>哪类开发人员</strong></p>
+<ul>
+<li>开发的方向上要有专长（比如 T 型人才）</li>
+<li>小众的专长有时候更能获得高薪</li>
+</ul>
+<p>第八章：</p>
+<p><strong>规模不同的公司</strong></p>
+<ul>
+<li>公司的规模以及工作体验</li>
+</ul>
+<p>第九章：</p>
+<p><strong>晋升规则</strong></p>
+<ul>
+<li>承担责任（负责一项任务、牵头一个项目或者被忽视的领域发挥自己的聪明才智）</li>
+<li>引人注目（每天记录活动日志、提供演讲或培训、发表意见和保证曝光度）</li>
+<li>自学（增加技能和知识，考取认证、知识分享）</li>
+<li>成为问题的解决者</li>
+</ul>
+<p>第十章：</p>
+<ul>
+<li>成为专业人士，有自己的质量标准，有良好的习惯</li>
+<li>专业人士不可能事事皆通，但会潜心钻研匠艺</li>
+<li>坚守正道，追求品质，完善自我</li>
+</ul>
+<p>第十一章：</p>
+<p><strong>如何辞掉你的工作</strong></p>
+<ul>
+<li>辞掉工作很简单，但是辞掉工作后的生存很重要</li>
+<li>为自己工作要比想象中的难的多，先以副业开始，小有成就后再全职投入</li>
+<li>在全职工作时养成良好习惯，提高工作效率和消减每月开支，开始为自己工作打好基础</li>
+<li>确实的计算每周能为副业投入多少时间，有计划的进行开发与宣传</li>
+</ul>
+<p>第十二章：</p>
+<p><strong>自由职业者</strong></p>
+<ul>
+<li>成为独立咨询师或独立开发者</li>
+<li>起步阶段很难获得源源不断的业务，理想状态是工作任务提前安排妥当或太多不得不推掉一些的情况</li>
+<li>吸引式营销 - 免费的⽹络课程、写书、在⼤会上做演讲、做客播客节⽬、制作⾃⼰的播客等（需要耐心和勤勉的工作）</li>
+<li>为自己定价 - 工作时的时薪 + 税费 + 耗材与记账（一般是时薪的 1.5-2 倍）</li>
+<li>根据市场来判断定价，根据给客户带来的价值定价，客户需要培养，一般要有一两个大客户或主营业务来支撑公司运营</li>
+</ul>
+<p>第十三章：</p>
+<p><strong>创建第一个产品</strong></p>
+<ul>
+<li>找到产品的目标受众（社区交流，用户咨询）</li>
+<li>确定产品原型后就广而告之（比如前期付费用户折扣）检验用户是否有付费意愿（这必须在你有一定知名度的情况下）</li>
+<li>尽量缩短开始行动到看到成果之间的周期，创业是一件极易失败的一件事，通过尝试和失败获得创业的技能</li>
+</ul>
+<p>第十四章：</p>
+<p><strong>你打算开始创业吗</strong></p>
+<ul>
+<li>创业公司分为自有资金创业和获得外部投资的创业</li>
+<li>创业公司的成长路径：创业孵化器 -&gt; 获得投资 -&gt; 投资轮次</li>
+</ul>
+<p>第十五章：</p>
+<p><strong>远程工作者</strong></p>
+<ul>
+<li>挑战：时间管理（日常规划），自我激励（干扰太多），孤独感（走出家门）</li>
+<li>联合办公空间</li>
+</ul>
+<p>第十六章：</p>
+<p><strong>假装自己能成功</strong></p>
+<ul>
+<li>是不自信的对立面，让你有一种能够克服一切障碍的信念（遇到一些无法处理的情况时）</li>
+<li>面试时这样做可以散发出自信和能干的气场，面试也不是完全符合要求，但是要有信心，坦率诚实第面对自己的能力或不足同时保持“我以前已经克服过那些困难”的心态和姿态</li>
+</ul>
+<p>第十七章：</p>
+<p><strong>修改简历</strong></p>
+<ul>
+<li>避免乏味可陈和一些常见的错误，简历在一定程度上算是“广告”</li>
+<li>可以雇一个专业的简历写手（个人不推荐这样做，除非你的专业技能跟写简历关联性不大或者不会写才找别人）</li>
+<li>比别人多做一点，要富有特色与创意，可以根据自己的专业方向做一些特别的设计</li>
+<li>简历内容一定要有重点，可以参考一些比较成功的简历，或者强调自己“做了哪些工作以及相应的结果”</li>
+</ul>
+<p>第十八章：</p>
+<p><strong>请勿陷入对技术的狂热之中</strong></p>
+<ul>
+<li>不要因为自己擅长而抱有偏见</li>
+<li>技术会随着时间的推移而变化，不拘一格</li>
+</ul>
+<p>第十九章：</p>
+<p><strong>“码农”的自我营销</strong></p>
+<ul>
+<li>正确的方式是为他人提供价值</li>
+<li>自我营销 - 学习如何控制好自己要传达的信息，塑造好自己的形象，扩展信息送达的人群</li>
+<li>通过营销来发挥自己的优势，来积极的管理自己的职业生涯</li>
+<li>自我营销的方式：博客、社交媒体等</li>
+</ul>
+<p>第二十章：</p>
+<p><strong>打造品牌</strong></p>
+<ul>
+<li>在一定程度上也可以看做“个人 IP”</li>
+<li>品牌的要素：所要传递的信息、视觉符号、一致性和曝光率</li>
+<li>品牌创建步骤：明确要传达的品牌信息、挑选细分市场、创建品牌口号、创建电梯内销售概要、创建视觉符号。</li>
+</ul>
+<p>第二十一章：</p>
+<p><strong>创建成功的博客</strong></p>
+<ul>
+<li>博客可以是你技术的展示平台，别人对你有更进一步了解的平台，也是一个组织你的思想并转化为文字</li>
+<li>持之以恒并 SEO，承接来自 Google 的流量</li>
+<li>在社交媒体上发布或者与其他人互动，不要太刻意从而引起被厌烦</li>
+</ul>
+<p>第二十二章：</p>
+<p><strong>为他人增加价值</strong></p>
+<ul>
+<li>无论是博客还是其它形式的营销，最主要的目的还是为他人带来价值，不然很容易被唾弃</li>
+<li>所有的营销产品 90%都应该免费，也容易被人接受和传播</li>
+</ul>
+<p>第二十三章：</p>
+<p><strong>善用社交媒体</strong></p>
+<ul>
+<li>首先要积累足够多的粉丝 （在线介绍、博客文章结尾或邮件的签名档中），不要害怕去主动邀请别人</li>
+<li>在社交媒体上提供有价值的内容，并保持活跃度</li>
+<li>不同的社交网络，全面铺开但是要有侧重点</li>
+</ul>
+<p>第二十四章：</p>
+<p><strong>做说话的极客</strong></p>
+<ul>
+<li>演讲：一种互动媒介，展示高效沟通的能力</li>
+<li>从小规模场合做起，逐渐完善演讲技能</li>
+<li>做视频培训也是一种很棒的自我营销方式</li>
+</ul>
+<p>第二十五章：</p>
+<p><strong>著书立说</strong></p>
+<ul>
+<li>书籍会为它的作者带来非凡的影响力，但是不赚钱</li>
+<li>出版书籍并不容易，传统出版商和自出版</li>
+</ul>
+<p>第二十六章：</p>
+<p><strong>持续奋进</strong></p>
+<ul>
+<li>万事开头难：凡事都有第一次，经历过后才有闲庭信步</li>
+<li>不要太在意一开始的表现（包括第一次登台演讲、写了不受认可的博客和录制的视频没人看等）持之以恒才会慢慢变好</li>
+<li>小步快跑，采用小幅前进的方式稳扎稳打</li>
+</ul>
+<p>第二十七章：</p>
+<p><strong>自我学习，自我教育</strong></p>
+<ul>
+<li>通过动手实践和教会他人可以学习的更好</li>
+<li>玩耍是一项强大的学习机制，自然的探索和好奇心</li>
+<li>抛弃“填鸭式教学”的主动学习才是最简单和最纯粹的学习方式</li>
+</ul>
+<p>第二十八章：</p>
+<p><strong>十步学习法</strong></p>
+<ul>
+<li>提高自学的效率，提前掌握全部知识是在浪费时间</li>
+<li>三项主题：如何开始，我能做什么和相关基础知识（关注重点）</li>
+<li>十步学习法：要对自己要学的内容有个基本的了解（了解自己不知道什么就足矣）</li>
+</ul>
+<p>第二十九章：</p>
+<p><strong>1-6 步骤</strong></p>
+<ul>
+<li>了解全局：通过收集一些信息或者阅读一本书的介绍性章节对所要学习的内容有一个大致性的了解</li>
+<li>确定范围：集中精力明确自己到底要学什么，带有目的性的学习前可以快速确定方位</li>
+<li>定义目标：明确目标后可以使用倒推的方式明确实现目标所需要的步骤，清晰的描述出成功做到的事</li>
+<li>寻找资源：图书、博客、在线视频、某位专家、博客、源代码、示例项目和在线文档等各种各样的信息</li>
+<li>创建学习计划：学习是一件层层递进的事，找出最佳的学成路径</li>
+<li>筛选资源：通过筛选，找出品质最好的资源且能覆盖学习计划</li>
+</ul>
+<p>第三十章：</p>
+<p><strong>7-10 步骤</strong></p>
+<ul>
+<li>步骤目标：通过学习-实践-掌握-教授的方式真正领会知识</li>
+<li>开始学习，浅尝辄止：</li>
+<li>动手操作，边学边玩：</li>
+<li>全面掌握，学以致用：</li>
+<li>乐为人师，融会贯通：</li>
+</ul>
+<p>第三十一章：</p>
+<p><strong>寻找导师</strong></p>
+<ul>
+<li>寻找一位已经实现了你所设定的目标的人做你的导师（朋友、公司领导或老板）</li>
+<li>虚拟导师：读书</li>
+</ul>
+<p>第三十二章：</p>
+<p><strong>成为别人的导师</strong></p>
+<ul>
+<li>只要在某些方面快人一步就可以帮到某人</li>
+<li>教授是学习的最佳途径之一</li>
+</ul>
+<p>第三十三章：</p>
+<p><strong>传道授业</strong></p>
+<ul>
+<li>能将自己的专业知识传授给别人是成为专家的一部分要求</li>
+<li>传道授业也可以帮助自己发现一些没有理解透彻到可以向别人解释的知识</li>
+<li>教授别人时无需表现得更智慧、更博学，只要充满信息，坚信自己所说的一切</li>
+<li>博客、内部演讲、视频录播等都是很好的教学方式</li>
+</ul>
+<p>第三十四章：</p>
+<p><strong>获取学位</strong></p>
+<ul>
+<li>学位算是成功的一个限制性因素，限制了职位数量和晋升</li>
+<li>业余时间提升学历，或者获得专业认证</li>
+</ul>
+<p>第三十五章：</p>
+<p><strong>发现知识短板</strong></p>
+<ul>
+<li>短板：日常工作中花费了大量的时间或者重复性的劳动</li>
+<li>消除短板的关键就是定位短板</li>
+</ul>
+<p>第三十六章：</p>
+<p><strong>一切始于专注</strong></p>
+<ul>
+<li>专注就是注意力分散的对立面，就是一种让你持续投入以至于忘记吃饭喝水的境界</li>
+<li>专注可以提高生产力，强迫自己坐下来专注于某一件事，激发斗志，对抗各种分心的事情</li>
+</ul>
+<p>第三十七章：</p>
+<p><strong>如何提效</strong></p>
+<ul>
+<li>提前规划，细致划分，年月周日计划</li>
+<li>使用工具进行任务管理，番茄工作法提高效率</li>
+<li>劳逸结合，有段时间安排轻松的任务给自己放空</li>
+</ul>
+<p>第三十八章：</p>
+<p><strong>番茄工作法</strong></p>
+<ul>
+<li>番茄工作法是一种工作计量方式，通过这个方法你可以知道你一天饱和状态下的工作量</li>
+<li>逐步改进可以提升工作效率</li>
+</ul>
+<p>第三十九章：</p>
+<p><strong>定额工作法</strong></p>
+<ul>
+<li>对于重复性的工作，在规定时间内完成规定次数</li>
+<li>原理是把大任务分解成可见进度的小任务，并给自己做出“承诺”</li>
+<li>可以有所调整，但是一定要在有效时间内完成，在一定程度上可以克服意志力薄弱的问题</li>
+</ul>
+<p>第四十章：</p>
+<p><strong>对自己负责</strong></p>
+<ul>
+<li>完成工作的两大动机：内部动机和外部动机，内部动机在远程工作时激励自己完成工作</li>
+<li>外部监督有时也可以很好的互相激励</li>
+</ul>
+<p>第四十一章：</p>
+<p><strong>是否要多任务并行</strong></p>
+<ul>
+<li>真正的多任务并行指的是同时做两件甚至更多事情，但是大多数人只是在做任务切换</li>
+<li>学会批量处理一些干扰自己专注的任务，防止自己的专注被打断</li>
+<li>多任务并行一般可以做一些大脑和身体各自的任务，其中大脑或者身体部分不太占用专注力，可以融洽相处的任务</li>
+</ul>
+<p>第四十二章：</p>
+<p><strong>解决职业倦怠</strong></p>
+<ul>
+<li>人们总是对刚出现的新鲜事物感兴趣，习以为常之后就会产生倦怠感</li>
+<li>坚持不懈，坚持到底是关键，经历痛苦就是克服倦怠的秘诀，创建一套确保自己继续前行的规则</li>
+</ul>
+<p>第四十三章：</p>
+<p><strong>时间如何被浪费掉</strong></p>
+<ul>
+<li>一些常见的时间杀手（看电视、社交媒体、新闻网站、不必要的会议、烹饪、游戏等）</li>
+<li>跟踪你的时间，准确的找出你的时间都花在哪了并尝试去改进</li>
+</ul>
+<p>第四十四章：</p>
+<p><strong>习惯的力量</strong></p>
+<ul>
+<li>生产力的秘诀：长期坚持做一些小事，习惯改变未来</li>
+<li>让惯例更细化：每天必须从最重要的事情开始，一天的工作要有优先级</li>
+</ul>
+<p>第四十五章：</p>
+<p><strong>培养习惯</strong></p>
+<ul>
+<li>习惯三要素：暗示、惯例和奖励（暗示导致习惯被触发，惯例是要做的事，是习惯的本质，奖励是让习惯保持下去的“锚”）</li>
+<li>摆脱坏习惯（日常让你感到内疚的事或惯例），用其它习惯代替，固定新习惯的暗示，保证习惯可以被触发</li>
+</ul>
+<p>第四十六章：</p>
+<p><strong>分解任务</strong></p>
+<ul>
+<li>合理的分解任务，大任务会给人带来沉重的心理负担</li>
+</ul>
+<p>第四十七章：</p>
+<p><strong>努力工作的价值</strong></p>
+<ul>
+<li>工作总是枯燥的，只有坚持才能应对这项单调乏味的苦差事</li>
+<li>工作最终必须要被完成，随意还不如现在就做，而不是拖到以后</li>
+</ul>
+<p>第四十八章：</p>
+<p><strong>任何行动都比不采取行动好</strong></p>
+<ul>
+<li>采取行动，拒绝拖延比什么都不做要好，即使方向错了也能及时调整过来</li>
+</ul>
+<p>第四十九章：</p>
+<p><strong>如何支配你的薪水</strong></p>
+<ul>
+<li>不要受困于短期思维，短视地进行借贷消费</li>
+<li>了解资产与负债的概念，学会节流与开源（投资也是一种开源）</li>
+</ul>
+<p>第五十章：</p>
+<p><strong>如何进行薪资谈判</strong></p>
+<ul>
+<li>个人名望越大，薪资谈判越容易，且先出价者输，迂回战术</li>
+<li>公司主动找到你 &gt; 个人推荐 &gt; 招聘网投递简历</li>
+</ul>
+<p>第五十一章：</p>
+<p><strong>期权</strong></p>
+<ul>
+<li>期权的基本概念</li>
+</ul>
+<p>第五十二章：</p>
+<p><strong>房地产投资</strong></p>
+<ul>
+<li>房地产投资是优质投资（美国）</li>
+</ul>
+<p>第五十三章：</p>
+<p><strong>制定提前退休计划</strong></p>
+<ul>
+<li>精确的计算每个月的生活费用，找出办法来确保自己的收入能满足这一要求，同时还留有余地，以备不时之需</li>
+<li>缩减开支可以让你的退休计划提前，同时打造被动收入，以及一些投资机会</li>
+<li>创建自己的退休账户，跟社保账户区别开来，多管齐下，开源节流</li>
+</ul>
+<p>第五十四章：</p>
+<p><strong>债务的危害</strong></p>
+<ul>
+<li>收益给我们自由，债务会给我们套上枷锁，不要轻易背上债务</li>
+<li>背债的底线是确保背上债务之前，这笔债务实际上是一笔投资，这笔投资产生的回报高于债务的利息</li>
+</ul>
+<p>第五十五章：</p>
+<p><strong>如何 33 岁就退休</strong></p>
+<ul>
+<li>（09-13）接近四年的经历来翻盘人生，作者的人生经历确实有些精彩</li>
+</ul>
+<p>第五十六章：</p>
+<p><strong>破解健康密码</strong></p>
+<ul>
+<li>健身能够提高思维，自信心，提高创造力，并且程序员更需要良好的身体素质</li>
+</ul>
+<p>第五十七章：</p>
+<p><strong>设定健康标准</strong></p>
+<ul>
+<li>设定短期和长期目标来获得更好的效果，切勿想同一时间达成多个目标</li>
+<li>创建里程碑，把大目标分解成小目标来逐步完成</li>
+<li>切实的改善自己的生活方式，不然减肥计划会多次反弹</li>
+</ul>
+<p>第五十八章：</p>
+<p><strong>热力学、热量和你</strong></p>
+<ul>
+<li>减肥就是消耗 &gt; 摄入，计算卡路里的摄入与消耗以便达到能量赤字</li>
+</ul>
+<p>第五十九章：</p>
+<p><strong>不要一直坐着</strong></p>
+<ul>
+<li>给予自己激励，切勿过早奖励自己，提前做规划，不要临门做决定，同时为了极限时坚持下去，给自己找个人生格言或口号</li>
+</ul>
+<p>第六十章：</p>
+<p><strong>如何增长肌肉</strong></p>
+<ul>
+<li>力量训练</li>
+</ul>
+<p>第六十一章：</p>
+<p><strong>获得完美腹肌</strong></p>
+<ul>
+<li>只有体脂率很低的情况下才能练就腹肌，肚子是很容易堆积脂肪的</li>
+</ul>
+<p>第六十二章：</p>
+<p><strong>启动跑步程序</strong></p>
+<ul>
+<li>跑步可以提高心血管健康，利用软件帮助你运动起来</li>
+</ul>
+<p>第六十三章：</p>
+<p><strong>站立式办公及其他</strong></p>
+<ul>
+<li>站着比坐着更有益于健康，从饮食中控制脂肪的摄入</li>
+</ul>
+<p>第六十四章：</p>
+<p><strong>极客装备</strong></p>
+<ul>
+<li>一些健身或者减肥的辅助装备，其中蕴含一些科技</li>
+</ul>
+<p>第六十五章：</p>
+<p><strong>心灵影响身体</strong></p>
+<ul>
+<li>另一层面上也可以说认知会影响你的行为</li>
+</ul>
+<p>第六十六章：</p>
+<p><strong>重新启动</strong></p>
+<ul>
+<li>积极性有很多正面的作用，积极思考在应⽤层⾯上是现实主义的最终体现</li>
+<li>关键是积极思考不会从天⽽降，也不是⼀夜间就能获得的，你要付出持续的努⼒，将思想转向积极的⽅向。</li>
+</ul>
+<p>第六十七章：</p>
+<p><strong>规划你的大脑</strong></p>
+<ul>
+<li>规划大脑来创建一个积极的自我形象，信念的力量</li>
+</ul>
+<p>第六十八章：</p>
+<p><strong>爱情与恋爱</strong></p>
+<ul>
+<li>恋爱也是有规则的，解就是在⾏为上体现出⾃信，不要害怕被拒绝，没什么⼤不了的</li>
+</ul>
+<p>第六十九章：</p>
+<p><strong>书单</strong></p>
+<ul>
+<li>有投资类，提高效率类，理财类和代码整洁</li>
+</ul>
+<p>第七十章：</p>
+<p><strong>积极面对失败</strong></p>
+<ul>
+<li>放弃那脆弱的自尊心，失败是通往成功的必经之路</li>
+</ul>
+<h3 id="书籍-PDF"><a href="#书籍-PDF" class="headerlink" title="书籍 PDF"></a>书籍 PDF</h3><p><a target="_blank" rel="noopener" href="https://wowotou-blog.oss-cn-chengdu.aliyuncs.com/book/30d8c23e16b84eaf97ffe46286d16009.pdf">《软技能：代码之外的生存指南》PDF</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%BD%AF%E6%8A%80%E8%83%BD/" rel="tag"># 软技能</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/12/booslink-gif-play-controll/" rel="prev" title="低端设备上GIF依次播放实践">
+      <i class="fa fa-chevron-left"></i> 低端设备上GIF依次播放实践
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/29/books-softskill-review/" rel="next" title="软技能-代码之外的生存指南读后感">
+      软技能-代码之外的生存指南读后感 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%A0%E8%8A%82%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">章节总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B9%A6%E7%B1%8D-PDF"><span class="nav-number">2.</span> <span class="nav-text">书籍 PDF</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
