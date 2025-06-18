@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="由于项目里大量使用了RecyclerView控件，在数据加载后进行数据刷新时只是使用了notifyDataSetChanged方法，该方法也被系统警告说效率不高，碰巧最近在做性能优化，就研究了下DiffUtil的使用，然后基于AsyncListDiffer封装了BaseDiffAdapter和BaseDiffHolder，在适合场景的页面下把之前的BaseAdapter和BaseHolder做了简">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DiffUtil优化RecyclerView数据加载">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/05/28/android-recyclerview-diffutil/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="由于项目里大量使用了RecyclerView控件，在数据加载后进行数据刷新时只是使用了notifyDataSetChanged方法，该方法也被系统警告说效率不高，碰巧最近在做性能优化，就研究了下DiffUtil的使用，然后基于AsyncListDiffer封装了BaseDiffAdapter和BaseDiffHolder，在适合场景的页面下把之前的BaseAdapter和BaseHolder做了简">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-05-28T08:20:09.000Z">
+<meta property="article:modified_time" content="2025-06-18T14:44:56.057Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="RecyclerView">
+<meta property="article:tag" content="DiffUtil">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/05/28/android-recyclerview-diffutil/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>DiffUtil优化RecyclerView数据加载 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/05/28/android-recyclerview-diffutil/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DiffUtil优化RecyclerView数据加载
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-05-28 16:20:09" itemprop="dateCreated datePublished" datetime="2025-05-28T16:20:09+08:00">2025-05-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>由于项目里大量使用了<code>RecyclerView</code>控件，在数据加载后进行数据刷新时只是使用了<code>notifyDataSetChanged</code>方法，该方法也被系统警告说效率不高，碰巧最近在做性能优化，就研究了下<code>DiffUtil</code>的使用，然后基于<code>AsyncListDiffer</code>封装了<code>BaseDiffAdapter</code>和<code>BaseDiffHolder</code>，在适合场景的页面下把之前的<code>BaseAdapter</code>和<code>BaseHolder</code>做了简单替换。下面就来详细介绍下<code>DiffUtil</code>的使用方法。</p>
+<span id="more"></span>
+
+<p><code>DiffUtil</code>是官方提供的高效计算两个数据集之间差异的工具，在<code>RecyclerView</code>数据刷新时，可以快速的计算出需要更新的数据集，从而实现高效的数据刷新。常见的使用方法有同步计算的<code>DiffUtil.Callback</code>， 和异步计算的<code>ListAdapter</code>和<code>AsyncListDiffer</code>，使用方式略有不同，下面分别介绍下。</p>
+<h3 id="DiffUtil-Callback"><a href="#DiffUtil-Callback" class="headerlink" title="DiffUtil.Callback"></a>DiffUtil.Callback</h3><p><code>DiffUtil.Callback</code>是<code>DiffUtil</code>的核心类，用于比较旧数据集和新数据集的元素，并计算它们之间的差异，并且可以与原有的<code>Adapter</code>写法解耦。它包含四个抽象方法，需要我们自行实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="type">int</span> <span class="title function_">getOldListSize</span><span class="params">()</span> <span class="comment">// 获取旧数据集的大小。</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="type">int</span> <span class="title function_">getNewListSize</span><span class="params">()</span> <span class="comment">// 获取新数据集的大小。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//判断旧数据集中的某个元素和新数据集中的某个元素是否代表同一个实体。</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="type">boolean</span> <span class="title function_">areItemsTheSame</span><span class="params">(<span class="type">int</span> oldItemPosition, <span class="type">int</span> newItemPosition)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//判断旧数据集中的某个元素和新数据集中的某个元素的内容是否相同。</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="type">boolean</span> <span class="title function_">areContentsTheSame</span><span class="params">(<span class="type">int</span> oldItemPosition, <span class="type">int</span> newItemPosition)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取旧数据集中的某个元素和新数据集中的某个元素之间的差异信息。如果这两个元素相同，但是内容发生改变，可以通过这个方法获取它们之间的差异信息，从而只更新需要改变的部分，减少不必要的更新操作。</span></span><br><span class="line"><span class="keyword">public</span> Object <span class="title function_">getChangePayload</span><span class="params">(<span class="type">int</span> oldItemPosition, <span class="type">int</span> newItemPosition)</span> <span class="comment">// 可选</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//设置是否开启移动操作的检测。如果设置为 true，DiffUtil 会检测数据集中元素的移动操作，并生成移动操作的更新列表。但是，开启移动操作的检测会增加计算量，可能会影响性能。</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">getMoveDetectionFlag</span><span class="params">()</span> <span class="comment">// 可选</span></span><br></pre></td></tr></table></figure>
+
+<p>创建自定义的继承<code>DiffUtil.Callback</code>的类，基本上我们主要关注<code>areItemsTheSame</code>方法和<code>areContentsTheSame</code>方法即可，在对比的过程中，<code>areItemsTheSame</code>方法返回<code>false</code>则会调用<code>Adapter</code>对应<code>position</code>的<code>onCreateViewHolder</code>，<code>areContentsTheSame</code>方法返回<code>false</code>则会调用<code>Adapter</code>对应<code>position</code>的<code>onBindViewHolder</code>三个参数的方法，如果你的<code>Item</code>里的内容比较丰富可以使用<code>getChangePayload</code>方法来实现局部刷新。用法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> Object <span class="title function_">getChangePayload</span><span class="params">(<span class="type">int</span> oldItemPosition, <span class="type">int</span> newItemPosition)</span> &#123;</span><br><span class="line">    <span class="type">YourItem</span> <span class="variable">oldItem</span> <span class="operator">=</span> oldList.get(oldItemPosition);</span><br><span class="line">    <span class="type">YourItem</span> <span class="variable">newItem</span> <span class="operator">=</span> newList.get(newItemPosition);</span><br><span class="line"></span><br><span class="line">    <span class="type">Bundle</span> <span class="variable">diffBundle</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Bundle</span>();</span><br><span class="line">    <span class="keyword">if</span> (!oldItem.title.equals(newItem.title)) &#123;</span><br><span class="line">        diffBundle.putString(<span class="string">&quot;KEY_TITLE&quot;</span>, newItem.title);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!oldItem.subtitle.equals(newItem.subtitle)) &#123;</span><br><span class="line">        diffBundle.putString(<span class="string">&quot;KEY_SUBTITLE&quot;</span>, newItem.subtitle);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (diffBundle.size() == <span class="number">0</span>) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">return</span> diffBundle;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在 Adapter 中处理：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onBindViewHolder</span><span class="params">(<span class="meta">@NonNull</span> ViewHolder holder, <span class="type">int</span> position, <span class="meta">@NonNull</span> List&lt;Object&gt; payloads)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (payloads.isEmpty()) &#123;</span><br><span class="line">        <span class="built_in">super</span>.onBindViewHolder(holder, position, payloads);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="type">Bundle</span> <span class="variable">bundle</span> <span class="operator">=</span> (Bundle) payloads.get(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (bundle.containsKey(<span class="string">&quot;KEY_TITLE&quot;</span>)) &#123;</span><br><span class="line">            holder.titleTextView.setText(bundle.getString(<span class="string">&quot;KEY_TITLE&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (bundle.containsKey(<span class="string">&quot;KEY_SUBTITLE&quot;</span>)) &#123;</span><br><span class="line">            holder.subtitleTextView.setText(bundle.getString(<span class="string">&quot;KEY_SUBTITLE&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>自定义完自己的<code>DiffUtil.Callback</code>后，就可以把 calculate 后的<code>DiffResult</code>调用<code>dispatchUpdatesTo</code>应用到<code>Adapter</code>里。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> <span class="variable">mOldList</span> <span class="operator">=</span> mAdapter.getDataList();</span><br><span class="line"><span class="comment">// 计算差异</span></span><br><span class="line">DiffUtil.<span class="type">Callback</span> <span class="variable">callback</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CustomCallback</span>(mOldList, newList);</span><br><span class="line">DiffUtil.<span class="type">DiffResult</span> <span class="variable">result</span> <span class="operator">=</span> DiffUtil.calculateDiff(callback);</span><br><span class="line"><span class="comment">// 通知 Adapter</span></span><br><span class="line">result.dispatchUpdatesTo(mAdapter);</span><br></pre></td></tr></table></figure>
+
+<p>如果数据量相对较少可以使用<code>DiffUtil.Callback</code>这种<strong>同步计算</strong>数据差异的方式，使用起来可以跟项目里现有的<code>Adapter</code>封装体系解耦，数据量较大且场景合适则需要使用另外两种<code>ListAdapter</code>和<code>AsyncListDiffer</code><strong>异步计算</strong>的方式。</p>
+<h3 id="ListAdapter-AsyncListDiffer"><a href="#ListAdapter-AsyncListDiffer" class="headerlink" title="ListAdapter&#x2F;AsyncListDiffer"></a>ListAdapter&#x2F;AsyncListDiffer</h3><p><code>ListAdapter</code>是<code>RecyclerView.Adapter</code>的子类，内部集成了<code>AsyncListDiffer</code>，比较数据差异则需要继承范型类<code>DiffUtil.ItemCallback&lt;T&gt;</code>，用法跟<code>DiffUtil.Callback</code>相似，但是<code>DiffUtil.ItemCallback</code>的<code>areItemsTheSame</code>方法和<code>areContentsTheSame</code>方法的参数类型是<code>T</code>类型，需要自己实现。通过<code>submitList</code>来提交数据集，<code>submitList</code>内部会自动计算数据差异，然后应用到<code>Adapter</code>里。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ListAdapter&lt;YourItem, YourAdapter.ViewHolder&gt; adapter = <span class="keyword">new</span> <span class="title class_">ListAdapter</span>&lt;&gt;(<span class="keyword">new</span> <span class="title class_">DiffUtil</span>.ItemCallback&lt;YourItem&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">areItemsTheSame</span><span class="params">(<span class="meta">@NonNull</span> YourItem oldItem, <span class="meta">@NonNull</span> YourItem newItem)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> oldItem.id == newItem.id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">areContentsTheSame</span><span class="params">(<span class="meta">@NonNull</span> YourItem oldItem, <span class="meta">@NonNull</span> YourItem newItem)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> oldItem.equals(newItem);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 提交数据</span></span><br><span class="line">adapter.submitList(newList);</span><br></pre></td></tr></table></figure>
+
+<p>这里的<code>areItemsTheSame</code>和<code>areContentsTheSame</code>则需要根据具体情况来实现，需要根据不同情况来做针对性的处理。<code>AsyncListDiffer</code>的用法具体可以参考<code>ListAdapter</code>内部的实现。</p>
+<p>具体使用<code>ListAdapter</code>还是<code>AsyncListDiffer</code>需要根据项目的封装情况来决定，拿我这次实践的情况来说，我就是基于<code>AsyncListDiffer</code>做了<code>BaseDiffAdapter</code>和<code>BaseDiffHolder</code>的封装，只需要额外提供一个<code>DiffUtil.ItemCallback</code>的实现类，就可以跟原本项目里的<code>BaseAdapter</code>和<code>BaseHolder</code>做替换。</p>
+<h3 id="DiffUtil-算法"><a href="#DiffUtil-算法" class="headerlink" title="DiffUtil 算法"></a>DiffUtil 算法</h3><p><code>DiffUtil</code>基于<code>Myers</code>差分算法，通过以下机制实现高效的列表更新：</p>
+<p><strong>核心算法：</strong></p>
+<ul>
+<li>使用编辑图和<code>Snake</code>路径计算最短编辑脚本，时间复杂度<code>O(ND)</code>。</li>
+<li>双向搜索优化搜索效率，空间复杂度<code>O(N)</code>。</li>
+</ul>
+<p><strong>源码实现：</strong></p>
+<ul>
+<li><code>calculateDiff()</code>和<code>diffPartial()</code>现<code>Myers</code>算法，生成<code>Snake</code>序列。</li>
+<li><code>computeMoves()</code>检测移动操作，优化动画。</li>
+<li><code>DiffResult</code>分发更新到 Adapter，触发局部刷新。</li>
+</ul>
+<p><strong>优化手段：</strong></p>
+<ul>
+<li>双向搜索、差异最小化、移动检测、空间优化和异步支持。</li>
+<li>适配大数据集、复杂动画和低内存设备。</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>DiffUtil</code>的使用场景是数据集发生大规模变更时高效的刷新<code>UI</code>，适合一次性大批量&#x2F;复杂的数据变化，不适合跟单条数据增删改：<code>notifyItemInserted/Removed/Changed</code>一起混用，容易导致<code>Adapter</code>和数据源不同步，使用<code>DiffUtil</code>处理个别数据变动时需要先使用就数据<code>mOldList</code>clone 或者新建一个列表之后再对数据进行变动，不然应用到<code>Adapter</code>后没有效果，所以是否要使用<code>DiffUtil</code>取决于具体的应用场景和使用后有没有带来性能的提升。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/RecyclerView/" rel="tag"># RecyclerView</a>
+              <a href="/tags/DiffUtil/" rel="tag"># DiffUtil</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/22/android-develop-rules/" rel="prev" title="Android开发过程中的命名规范">
+      <i class="fa fa-chevron-left"></i> Android开发过程中的命名规范
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/06/05/android-anr-optimize/" rel="next" title="Android 性能优化之卡顿优化">
+      Android 性能优化之卡顿优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#DiffUtil-Callback"><span class="nav-number">1.</span> <span class="nav-text">DiffUtil.Callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ListAdapter-AsyncListDiffer"><span class="nav-number">2.</span> <span class="nav-text">ListAdapter&#x2F;AsyncListDiffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DiffUtil-%E7%AE%97%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">DiffUtil 算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

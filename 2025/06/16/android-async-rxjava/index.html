@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="个人使用RxJava接近十年，是国内比较早的一批把RxJava做为主要技术栈的Android开发者，一些在当时看来比较复杂的业务逻辑，最后都通过RxJava的操作符解决，包括后面开发语言切换到kotlin后使用协程做异步开发，我个人也比较偏向于使用Flow这个跟RxJava很像的数据流式操作框架。现如今开发语言又切回到Java，对Rxjava的使用场景也更丰富了，下面简单介绍一下我用RxJava在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RxJava 实用案例">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/06/16/android-async-rxjava/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="个人使用RxJava接近十年，是国内比较早的一批把RxJava做为主要技术栈的Android开发者，一些在当时看来比较复杂的业务逻辑，最后都通过RxJava的操作符解决，包括后面开发语言切换到kotlin后使用协程做异步开发，我个人也比较偏向于使用Flow这个跟RxJava很像的数据流式操作框架。现如今开发语言又切回到Java，对Rxjava的使用场景也更丰富了，下面简单介绍一下我用RxJava在">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-06-16T03:20:49.000Z">
+<meta property="article:modified_time" content="2025-06-18T14:40:52.787Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="ReactiveX">
+<meta property="article:tag" content="函数式变编程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/06/16/android-async-rxjava/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>RxJava 实用案例 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/06/16/android-async-rxjava/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RxJava 实用案例
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-06-16 11:20:49" itemprop="dateCreated datePublished" datetime="2025-06-16T11:20:49+08:00">2025-06-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>个人使用<code>RxJava</code>接近十年，是国内比较早的一批把<code>RxJava</code>做为主要技术栈的<code>Android</code>开发者，一些在当时看来比较复杂的业务逻辑，最后都通过<code>RxJava</code>的操作符解决，包括后面开发语言切换到<code>kotlin</code>后使用协程做异步开发，我个人也比较偏向于使用<code>Flow</code>这个跟<code>RxJava</code>很像的数据<strong>流式</strong>操作框架。现如今开发语言又切回到<code>Java</code>，对<code>Rxjava</code>的使用场景也更丰富了，下面简单介绍一下我用<code>RxJava</code>在<code>Android</code>开发中的一些实用案例。</p>
+<span id="more"></span>
+
+<h3 id="结合-Retrofit"><a href="#结合-Retrofit" class="headerlink" title="结合 Retrofit"></a>结合 Retrofit</h3><p><code>RxJava</code>异步处理 + <code>Retrofit</code>网络请求 + <code>Gson</code>数据解析是<code>Android</code>开发曾经比较流行的开发组合，其中<code>RxJava</code>是可选的也是最难的部分，数据流式的链式调用、简单的异步操作和简洁优雅的代码处理是其优势，同样其操作符的丰富度与复杂度也是门槛之一，熟练地在业务中使用也需要一定的积累。</p>
+<p>这里简单介绍一下<code>RxJava</code>在<code>Retrofit</code>网络请求中的使用，代码示例如下：</p>
+<p><strong>引入依赖：</strong></p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">implementation <span class="string">&#x27;com.squareup.retrofit2:adapter-rxjava3:2.9.0&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>构建 Retrofit 对象：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CallAdapter&lt;R, ?&gt; callAdapter -&gt; RxJava的观察者类型，支持Observable、Single、Maybe、Flowable和Completable</span></span><br><span class="line"><span class="type">RxJava2CallAdapterFactory</span> <span class="variable">rxJava3CallAdapterFactory</span> <span class="operator">=</span> RxJava3CallAdapterFactory.createWithScheduler(Schedulers.io())</span><br><span class="line"><span class="type">Retrofit</span> <span class="variable">retrofit</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Retrofit</span>.Builder()</span><br><span class="line">            .baseUrl(Constants.BASE_URL)</span><br><span class="line">            .client(okHttpClient)</span><br><span class="line">            .addCallAdapterFactory(rxJava3CallAdapterFactory)</span><br><span class="line">            .addConverterFactory(gsonConverterFactory)</span><br><span class="line">            .build();</span><br></pre></td></tr></table></figure>
+
+<p><strong>定义接口：</strong></p>
+<p>我们在定义<code>Retrofit</code>支持的网络接口请求类时，请求方法的返回类型直接使用<code>RxJava</code>支持的被观察者类型包裹，这种处理正是上面添加的<code>CallAdapter</code>类支持<code>Call&lt;T&gt;</code>到<code>RxJava</code>观察者类型的转换，下面是示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ApiService</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 原始的网络请求方法定义</span></span><br><span class="line">    <span class="meta">@GET(&quot;api/&#123;someApi&#125;&quot;)</span></span><br><span class="line">    Call&lt;ApiResponse&lt;T&gt;&gt; <span class="title function_">getServerData</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GET(&quot;api/someApi&quot;)</span></span><br><span class="line">    Single&lt;ApiResponse&lt;T&gt;&gt; <span class="title function_">getServerData</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GET(&quot;api/someApi&quot;)</span></span><br><span class="line">    Observable&lt;ApiResponse&lt;T&gt;&gt; <span class="title function_">getServerData</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GET(&quot;api/someApi&quot;)</span></span><br><span class="line">    Flowable&lt;ApiResponse&lt;T&gt;&gt; <span class="title function_">getServerData</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GET(&quot;api/someApi&quot;)</span></span><br><span class="line">    Maybe&lt;ApiResponse&lt;T&gt;&gt; <span class="title function_">getServerData</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GET(&quot;api/someApi&quot;)</span></span><br><span class="line">    Completable <span class="title function_">getServerData</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>网络请求方法的返回类型可以根据具体的情况做合适的选择，我目前比较常用的是<code>Single</code>和<code>Completable</code>这两类。</p>
+<h3 id="通用逻辑复用"><a href="#通用逻辑复用" class="headerlink" title="通用逻辑复用"></a>通用逻辑复用</h3><p>现在的接口请求返回的数据格式一般都是<code>json</code>并且是<code>restful</code>风格，这样的数据风格非常方便进行统一的封装与业务处理。</p>
+<p><strong>统一数据泛型类：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ApiResponse</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="meta">@SerializedName(value = &quot;code&quot;, alternate = &#123;&quot;status&quot;&#125;)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> code;</span><br><span class="line">    <span class="meta">@SerializedName(value = &quot;message&quot;, alternate = &#123;&quot;msg&quot;&#125;)</span></span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">    <span class="keyword">private</span> T data;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ApiResponse</span><span class="params">()</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ApiResponse</span><span class="params">(<span class="type">int</span> code, String message, T data)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.code = code;</span><br><span class="line">        <span class="built_in">this</span>.message = message;</span><br><span class="line">        <span class="built_in">this</span>.data = data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// getters</span></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isSuccess</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 有的是code == 0</span></span><br><span class="line">        <span class="keyword">return</span> code == <span class="number">200</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于网络请求返回的数据，界面上需要显示的数据都在<code>data</code>字段里，从<code>ApiResponse&lt;T&gt;</code>-&gt;<code>T</code>的转换对每一个接口来说是一个重复的过程，利用<code>RxJava</code>的<code>Transformer</code>类可以把转换的逻辑封装起来，下面是示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> &lt;T&gt; ObservableTransformer&lt;ApiResponse&lt;T&gt;,T&gt; <span class="title function_">observableTransform</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ObservableTransformer</span>&lt;ApiResponse&lt;T&gt;, T&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="meta">@NonNull</span> ObservableSource&lt;T&gt; <span class="title function_">apply</span><span class="params">(<span class="meta">@NonNull</span> Observable&lt;ApiResponse&lt;T&gt;&gt; upstream)</span> &#123;</span><br><span class="line">            <span class="comment">// 示例1</span></span><br><span class="line">            <span class="keyword">return</span> upstream</span><br><span class="line">                .flatMap(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;ApiResponse&lt;T&gt;, ObservableSource&lt;? <span class="keyword">extends</span> <span class="title class_">T</span>&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="keyword">public</span> ObservableSource&lt;? <span class="keyword">extends</span> <span class="title class_">T</span>&gt; apply(ApiResponse&lt;T&gt; dataWithApiResponse) <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">                        <span class="keyword">if</span>(dataWithApiResponse.isSuccess())</span><br><span class="line">                            <span class="keyword">return</span> Observable.just(dataWithApiResponse.getData());</span><br><span class="line">                        <span class="comment">// 这里体现了RxJava的另一个好处，就是把异常传递下去，然后在onError或RxJavaPlugins.setErrorHandler中统一处理</span></span><br><span class="line">                        <span class="type">ApiException</span> <span class="variable">customException</span> <span class="operator">=</span> ...;<span class="comment">//根据业务码code返回不同的自定义异常</span></span><br><span class="line">                        <span class="keyword">return</span> Observable.error(customException);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            <span class="comment">// 示例2</span></span><br><span class="line">            <span class="keyword">return</span> upstream</span><br><span class="line">                .map(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;ApiResponse&lt;T&gt;, T&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="keyword">public</span> T <span class="title function_">apply</span><span class="params">(ApiResponse&lt;T&gt; dataWithApiResponse)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">                        <span class="keyword">if</span>(dataWithApiResponse.isSuccess())</span><br><span class="line">                            <span class="keyword">return</span> dataWithApiResponse.getData();</span><br><span class="line">                        <span class="comment">// 这里体现了RxJava的另一个好处，就是把异常传递下去，然后在onError或RxJavaPlugins.setErrorHandler中统一处理</span></span><br><span class="line">                        <span class="type">ApiException</span> <span class="variable">customException</span> <span class="operator">=</span> ...;<span class="comment">//根据业务码code返回不同的自定义异常</span></span><br><span class="line">                        <span class="keyword">throw</span> customException;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用示例</span></span><br><span class="line">Observable&lt;T&gt; serverData = apiService.getServerData()</span><br><span class="line">    .compose(observableTransform());</span><br></pre></td></tr></table></figure>
+
+<p><code>XXXTransformer</code>类内可以把一些通用的逻辑像网络请求错误重试、<code>Result</code>包裹类转换和<code>Token</code>过期刷新等业务逻辑统一处理，然后使用<code>compose</code>操作符进行业务逻辑复用，这样既可以把复杂的通用逻辑通过<code>compose</code>操作符组合应用，又能让代码更加简洁，逻辑更加清晰。</p>
+<h3 id="节流与防抖"><a href="#节流与防抖" class="headerlink" title="节流与防抖"></a>节流与防抖</h3><p>节流的定义是在连续高频事件触发时，保证在固定时间间隔内只执行一次操作，常用的案例是<code>View</code>的点击事件在固定时间间隔内防止触发多次。</p>
+<p><strong>常规实现：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义节流点击事件</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">ThrottleClickListener</span> <span class="keyword">implements</span> <span class="title class_">View</span>.OnClickListener &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">DEFAULT_THROTTLE_INTERVAL</span> <span class="operator">=</span> <span class="number">500</span>; <span class="comment">// 默认节流间隔（毫秒）</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">long</span> throttleInterval; <span class="comment">// 节流间隔（毫秒）</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">long</span> <span class="variable">lastClickTime</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ThrottleClickListener</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(DEFAULT_THROTTLE_INTERVAL);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ThrottleClickListener</span><span class="params">(<span class="type">long</span> throttleInterval)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.throttleInterval = throttleInterval;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">currentTime</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">        <span class="keyword">if</span> (currentTime - lastClickTime &gt; throttleInterval) &#123;</span><br><span class="line">            lastClickTime = currentTime;</span><br><span class="line">            onThrottleClick(v);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 否则忽略本次点击</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 节流后的点击回调，由子类实现</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">onThrottleClick</span><span class="params">(View v)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用示例</span></span><br><span class="line">button.setOnClickListener(<span class="keyword">new</span> <span class="title class_">ThrottleClickListener</span>() &#123; <span class="comment">// 使用默认节流间隔</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onThrottleClick</span><span class="params">(View v)</span> &#123;</span><br><span class="line">        <span class="comment">// 点击事件处理逻辑</span></span><br><span class="line">        doSomething();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>项目里如果不使用<code>RxJava</code>的话，可以通过自定义点击事件的方式实现节流的效果，但是如果使用<code>RxJava</code>的话，可以使用<code>RxBinding</code>配合<code>throttleFirst</code>操作符处理。</p>
+<p><strong><code>RxJava</code>操作符实现:</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">DEFAULT_THROTTLE_INTERVAL</span> <span class="operator">=</span> <span class="number">500</span>; <span class="comment">// 默认节流间隔（毫秒）</span></span><br><span class="line"></span><br><span class="line">RxView.clicks(button)</span><br><span class="line">    .throttleFirst(DEFAULT_THROTTLE_INTERVAL, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()) <span class="comment">// 第三个参数指定在哪个线程执行</span></span><br><span class="line">    .subscribe(v -&gt; &#123;</span><br><span class="line">        <span class="comment">// DEFAULT_THROTTLE_INTERVAL间隔内只响应一次点击</span></span><br><span class="line">        doSomething();</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>节流的时间间隔要选取合适的值，时间太长可能造成用户点击没有响应，太短则起不到优化的效果。</p>
+<p><strong>防抖</strong>的定义是用于控制高频率触发的事件，只在事件停止触发一段时间后才执行一次操作，避免短时间内多次重复执行的操作，常用的案例根据<code>EditText</code>的文本变化事件在固定时间间隔后只触发最后一次事件进行实时搜索操作。</p>
+<p><strong>常规实现：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义防抖事件</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">DebounceTextWatcher</span> <span class="keyword">implements</span> <span class="title class_">TextWatcher</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">DEFAULT_DEBOUNCE_INTERVAL</span> <span class="operator">=</span> <span class="number">500</span>; <span class="comment">// 默认防抖间隔（毫秒）</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">long</span> debounceInterval; <span class="comment">// 毫秒</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Handler</span> <span class="variable">handler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Handler</span>(Looper.getMainLooper());</span><br><span class="line">    <span class="keyword">private</span> Runnable workRunnable;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">DebounceTextWatcher</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(DEFAULT_DEBOUNCE_INTERVAL);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">DebounceTextWatcher</span><span class="params">(<span class="type">long</span> debounceInterval)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.debounceInterval = debounceInterval;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterTextChanged</span><span class="params">(<span class="keyword">final</span> Editable s)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (workRunnable != <span class="literal">null</span>) &#123;</span><br><span class="line">            handler.removeCallbacks(workRunnable);</span><br><span class="line">        &#125;</span><br><span class="line">        workRunnable = <span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">                onDebounceTextChanged(s.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        handler.postDelayed(workRunnable, debounceInterval);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 可选实现</span></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">beforeTextChanged</span><span class="params">(CharSequence s, <span class="type">int</span> start, <span class="type">int</span> count, <span class="type">int</span> after)</span> &#123;&#125;</span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onTextChanged</span><span class="params">(CharSequence s, <span class="type">int</span> start, <span class="type">int</span> before, <span class="type">int</span> count)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">clear</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (workRunnable != <span class="literal">null</span>) &#123;</span><br><span class="line">            handler.removeCallbacks(workRunnable);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 用户停止输入debounceInterval时间后会回调</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">onDebounceTextChanged</span><span class="params">(String text)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用示例</span></span><br><span class="line">editText.addTextChangedListener(<span class="keyword">new</span> <span class="title class_">DebounceTextWatcher</span>() &#123; <span class="comment">// 使用默认防抖间隔</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onDebounceTextChanged</span><span class="params">(String text)</span> &#123;</span><br><span class="line">        <span class="comment">// 因为有延时的处理，这里一定要判断页面是否处于resume状态</span></span><br><span class="line">        <span class="comment">// 这里执行防抖后的操作，例如发起搜索请求</span></span><br><span class="line">        searchSomething();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>同样的<code>Rxbinding</code>配合<code>debounce</code>操作符处理也可以达到相同的效果</p>
+<p><strong>RxJava 操作符实现</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">DEFAULT_DEBOUNCE_INTERVAL</span> <span class="operator">=</span> <span class="number">500</span>; <span class="comment">// 默认防抖间隔（毫秒）</span></span><br><span class="line"></span><br><span class="line">RxTextView.afterTextChangeEvents(editText)</span><br><span class="line">    .debounce(DEFAULT_DEBOUNCE_INTERVAL, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())</span><br><span class="line">    .subscribe(v -&gt; &#123;</span><br><span class="line">        <span class="comment">// 这里执行防抖后的操作，例如发起搜索请求</span></span><br><span class="line">        searchSomething();</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>防抖的时间间隔同样要根据场景设置合适的值，如果是网络请求进行搜索的场景下则需要在<code>Repository</code>层对前一次的搜索请求进行取消，因为网络请求时间的不确定性会造成前一次的搜索结果覆盖后续的搜索结果的情况出现，虽然出现这种情况的概率很低，但也要做一些防范。</p>
+<p>使用<code>Rxbinding</code>结合<code>RxJava</code>操作符的方式需要注意的是如果中间操作符的<code>Function</code>参数或者<code>onNext</code>参数方法体里发生了异常，RxJava 会自动将异常传递给<code>subscribe</code>的<code>onError</code>参数，没有设置的话则会传递给全局的<code>RxJavaPlugins.onErrorHandler</code>，下面有一个章节专门说<code>RxJava</code>异常方面的细节。</p>
+<blockquote>
+<p>注意无论是<code>RxView.clicks</code>还是<code>RxTextView.afterTextChangeEvents</code>，一定要把在<code>subscribe</code>后返回的<code>Disposable</code>对象管理起来，不然很容易造成内存泄露。</p>
+</blockquote>
+<h3 id="串行-并行请求"><a href="#串行-并行请求" class="headerlink" title="串行&#x2F;并行请求"></a>串行&#x2F;并行请求</h3><p>图片上传功能涉及到图片本地压缩、使用<code>SDK</code>请求临时<code>Token</code>（可选）、图片上传，其中图片本地压缩和请求临时<code>Token</code>可以并行处理，图片上传则依赖前一步的结果，把前面的并行处理看做一个个体的话，那么这个整体就是一个串行的请求，使用<code>RxJava</code>的<code>zip</code>和<code>flatMap</code>操作符可以实现这个效果。</p>
+<p><strong>伪代码如下：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Observable&lt;File&gt; compressObservable = ...; <span class="comment">// 图片压缩Observable</span></span><br><span class="line">Observable&lt;String&gt; tokenObservable = ...;  <span class="comment">// 获取Token Observable</span></span><br><span class="line"></span><br><span class="line">Observable.zip(compressObservable, tokenObservable, <span class="keyword">new</span> <span class="title class_">BiFunction</span>&lt;File, String, Pair&lt;File, String&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Pair&lt;File, String&gt; <span class="title function_">apply</span><span class="params">(File file, String token)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Pair</span>&lt;&gt;(file, token);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line">.flatMap(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Pair&lt;File, String&gt;, ObservableSource&lt;ApiResponse&lt;UploadResult&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> ObservableSource&lt;ApiResponse&lt;UploadResult&gt;&gt; <span class="title function_">apply</span><span class="params">(Pair&lt;File, String&gt; fileTokenPair)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">File</span> <span class="variable">compressedFile</span> <span class="operator">=</span> pair.first;</span><br><span class="line">        <span class="type">String</span> <span class="variable">token</span> <span class="operator">=</span> pair.second;</span><br><span class="line">        <span class="comment">// 返回图片上传的Observable</span></span><br><span class="line">        <span class="keyword">return</span> mRepository.uploadFile(compressedFile, token);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line">.compose(observableTransform())</span><br><span class="line"><span class="comment">// 线程调度</span></span><br><span class="line">.subscribe(uploadResult -&gt; &#123;</span><br><span class="line">    <span class="comment">// 上传成功处理</span></span><br><span class="line">&#125;, throwable -&gt; &#123;</span><br><span class="line">    <span class="comment">// 错误处理</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>日常的开发过程中这种串行&#x2F;并行的异步处理是比较常见的，使用<code>RxJava</code>的操作符把多个异步操作连接起来，使其一系列的的操作看上去像一个整体，代码看起来也比较简单整洁，这正是使用<code>RxJava</code>开发所带来的好处。</p>
+<h3 id="磁盘-内存缓存"><a href="#磁盘-内存缓存" class="headerlink" title="磁盘&#x2F;内存缓存"></a>磁盘&#x2F;内存缓存</h3><p>数据缓存是比较常见的业务场景之一，在数据的有效期内对数据进行缓存，可以提高数据的访问效率、降低网络请求的次数，使用<code>RxJava</code>的<code>concat</code>和<code>firstElement</code>操作符可以实现这个效果，下面是一个简单的例子：</p>
+<p><strong>RxJava 伪代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 内存缓存Observable</span></span><br><span class="line">Observable&lt;Data&gt; mermoryData = Observable.create(<span class="keyword">new</span> <span class="title class_">ObservableOnSubscribe</span>&lt;Data&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">subscribe</span><span class="params">(ObservableEmitter&lt;Data&gt; emitter)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//1. 获取内存缓存String类型数据</span></span><br><span class="line">        <span class="comment">//2. 使用Gson解析数据</span></span><br><span class="line">        <span class="comment">//3. 发送数据</span></span><br><span class="line">        emitter.onNext(data);</span><br><span class="line">        emitter.onComplete();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 磁盘缓存Observable</span></span><br><span class="line">Observable&lt;Data&gt; diskData = Observable.create(<span class="keyword">new</span> <span class="title class_">ObservableOnSubscribe</span>&lt;Data&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">subscribe</span><span class="params">(ObservableEmitter&lt;Data&gt; emitter)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//1. 获取磁盘缓存String类型数据</span></span><br><span class="line">        <span class="comment">//2. 使用Gson解析数据</span></span><br><span class="line">        <span class="comment">//3. 发送数据</span></span><br><span class="line">        emitter.onNext(data);</span><br><span class="line">        emitter.onComplete();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).map(data -&gt; &#123;</span><br><span class="line">    <span class="comment">//1. 使用Gson转换数据为String类型</span></span><br><span class="line">    <span class="comment">//2. 保存数据到内存</span></span><br><span class="line">    <span class="keyword">return</span> data;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 网络请求Observable</span></span><br><span class="line">Observable&lt;Data&gt; networkData = ...;<span class="comment">// 从网络获取数据</span></span><br><span class="line">    .map(data -&gt; &#123;</span><br><span class="line">        <span class="comment">//1. 使用Gson转换数据为String类型</span></span><br><span class="line">        <span class="comment">//2. 保存数据到内存和磁盘</span></span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line">    &#125;)；</span><br><span class="line"></span><br><span class="line">Maybe&lt;Data&gt; maybeData = Observable.concat(mermoryData, diskData, networkData)</span><br><span class="line">    .filter(data -&gt; data.isNotEmpty())</span><br><span class="line">    .firstElement() <span class="comment">// Maybe&lt;Data&gt;</span></span><br><span class="line">    .subscribe();</span><br><span class="line"></span><br><span class="line">或者</span><br><span class="line"></span><br><span class="line">Observable&lt;Data&gt; data = Observable.concat(mermoryData, diskData, networkData)</span><br><span class="line">    .filter(data -&gt; data.isNotEmpty())</span><br><span class="line">    .firstElement()<span class="comment">// Maybe&lt;Data&gt;</span></span><br><span class="line">    .toObservable()</span><br><span class="line">    <span class="comment">//如果最后网络数据请求失败或其它原因没有通过filter过滤，那么会抛出NoSuchElementException异常</span></span><br><span class="line">    .subscribe();</span><br></pre></td></tr></table></figure>
+
+<p>内存缓存推荐使用<code>LruCache</code>，为了统一处理所有数据的内存缓存，这里我们使用<code>LruCache&lt;String, String&gt;</code>封装底层数据存取，实际使用过程中需要进行<strong>具体类型</strong>数据到<strong>String</strong>数据的序列化与反序列化。磁盘缓存也是同样的处理，只不过磁盘缓存的底层可以使用<code>database</code>或<code>file</code>的存储方式，无论采用何种方式都要进行一定程度的封装。</p>
+<h3 id="轮询请求接口"><a href="#轮询请求接口" class="headerlink" title="轮询请求接口"></a>轮询请求接口</h3><p>需求场景：</p>
+<ul>
+<li>正常搜索，根据返回结果是否开启深度搜索</li>
+<li><code>code</code>为<code>0</code>或者<code>200</code>，正常搜索结束，返回搜索结果</li>
+<li><code>code</code>为特定业务码，则使用同级别的<code>searchId</code>字段值进行深度（轮询）搜索</li>
+<li>轮询间隔为<code>1s</code>，每次接口请求都会返回<code>code</code>决定是否继续轮询。</li>
+</ul>
+<p>这个业务场景并不多见，轮询请求接口一般是在等待后端的某个耗时操作处理完成，轮询虽然不是最优的方式，但却是实现成本比较低的方式。</p>
+<p><strong><code>RxJava</code>实现：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 首次搜索</span></span><br><span class="line">Observable&lt;SearchResult&gt; searchObservable = apiService.search(keyword)</span><br><span class="line">    .compose(observableTransform());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 深度（轮询）搜索，轮询间隔为 1s，直到接口返回搜索完成或接口请求出错为止</span></span><br><span class="line">Observable&lt;SearchResult&gt; <span class="title function_">deepSearchWithPolling</span><span class="params">(String searchId)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> apiservice.deepSearch(searchId)</span><br><span class="line">        .compose(observableTransform());</span><br><span class="line">        .repeatWhen(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Observable&lt;Object&gt;, ObservableSource&lt;?&gt;&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> ObservableSource&lt;?&gt; apply(Observable&lt;Object&gt; upstream) <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">                <span class="keyword">return</span> upstream.delay(<span class="number">1</span>, TimeUnit.SECONDS);</span><br><span class="line">                <span class="comment">// 或者</span></span><br><span class="line">                <span class="keyword">return</span> upstream</span><br><span class="line">                    .flatMap(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Object, ObservableSource&lt;?&gt;&gt;() &#123;</span><br><span class="line">                        <span class="meta">@Override</span></span><br><span class="line">                        <span class="keyword">public</span> ObservableSource&lt;?&gt; apply(Object o) <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">                            <span class="comment">// 根据条件来决定是否继续轮询</span></span><br><span class="line">                            <span class="keyword">return</span> needRepeat() ? Observable.timer(<span class="number">1</span>, TimeUnit.SECONDS) : Observable.empty();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .takeUntil(<span class="keyword">new</span> <span class="title class_">Predicate</span>&lt;SearchResult&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">test</span><span class="params">(SearchResult searchResult)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">                <span class="keyword">return</span> searchResult.isSuccess(); <span class="comment">// 根据返回的数据判断师傅要继续轮询</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .lastElement()</span><br><span class="line">        .toObservable();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 关联搜索</span></span><br><span class="line"><span class="type">Disposable</span> <span class="variable">disposable</span> <span class="operator">=</span> searchObservable</span><br><span class="line">    .flatMap(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;SearchResult, ObservableSource&lt;SearchResult&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ObservableSource&lt;SearchResult&gt; <span class="title function_">apply</span><span class="params">(SearchResult searchResult)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="keyword">if</span> (searchResult.isSuccess()) &#123;</span><br><span class="line">                <span class="keyword">return</span> Observable.just(searchResult);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> deepSearchWithPolling(searchResult.getSearchId());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// 线程调度</span></span><br><span class="line">    .subscribe();</span><br></pre></td></tr></table></figure>
+
+<p>深度（轮询）搜索停止的条件是<code>needRepeat()</code>返回<code>false</code>或者<code>takeUntil</code>返回<code>true</code>，<code>needRepeat()</code>方法是根据<strong>特定条件</strong>判断是否需要继续轮询，<code>takeUntil</code>是根据<strong>返回的数据</strong>判断是否需要结束轮询。</p>
+<h3 id="业务重试"><a href="#业务重试" class="headerlink" title="业务重试"></a>业务重试</h3><h4 id="网络错误重试"><a href="#网络错误重试" class="headerlink" title="网络错误重试"></a>网络错误重试</h4><p>需求场景：</p>
+<ul>
+<li>在弱网或者高并发的场景下请求接口容易发生<code>Timeout</code>等异常，需要进行网络请求重试</li>
+<li>重试有次数限制，且每次重试的间隔时间随次数递增，重试次数跟相应的重试间隔时间可配置</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//重试次数是retryConditions的长度，重试间隔时间是retryConditions的值</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; ObservableTransformer&lt;T, T&gt; <span class="title function_">observableApiRetry</span><span class="params">(List&lt;Long&gt; retryConditions)</span> &#123; <span class="comment">// Arrays.asList(1, 2, 4, 8)</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ObservableTransformer</span>&lt;T, T&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="meta">@NonNull</span> ObservableSource&lt;T&gt; <span class="title function_">apply</span><span class="params">(<span class="meta">@NonNull</span> Observable&lt;T&gt; upstream)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> upstream</span><br><span class="line">                    <span class="comment">//retryWhen有条件的进行重试，根据 apply 方法返回的Observable类型决定是否自动重新订阅上游Observable</span></span><br><span class="line">                    .retryWhen(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Observable&lt;Throwable&gt;, ObservableSource&lt;?&gt;&gt;() &#123;</span><br><span class="line">                        <span class="meta">@Override</span></span><br><span class="line">                        <span class="keyword">public</span> ObservableSource&lt;?&gt; apply(Observable&lt;Throwable&gt; throwableObservable) <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">                            <span class="keyword">return</span> throwableObservable</span><br><span class="line">                                    .zipWith(retryConditions, <span class="keyword">new</span> <span class="title class_">BiFunction</span>&lt;Throwable, Long, Pair&lt;Throwable, Long&gt;&gt;() &#123;</span><br><span class="line">                                        <span class="meta">@Override</span></span><br><span class="line">                                        <span class="keyword">public</span> Pair&lt;Throwable, Long&gt; <span class="title function_">apply</span><span class="params">(Throwable throwable, Long aLong)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">                                            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Pair</span>&lt;&gt;(throwable, aLong);</span><br><span class="line">                                        &#125;</span><br><span class="line">                                    &#125;)</span><br><span class="line">                                    .flatMap(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Pair&lt;Throwable, Long&gt;, ObservableSource&lt;Long&gt;&gt;() &#123;</span><br><span class="line">                                        <span class="meta">@Override</span></span><br><span class="line">                                        <span class="keyword">public</span> ObservableSource&lt;Long&gt; <span class="title function_">apply</span><span class="params">(Pair&lt;Throwable, Long&gt; throwableLongPair)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">                                            <span class="type">Throwable</span> <span class="variable">throwable</span> <span class="operator">=</span> throwableLongPair.first;</span><br><span class="line">                                            <span class="type">long</span> <span class="variable">time</span> <span class="operator">=</span> throwableLongPair.second;</span><br><span class="line">                                            <span class="keyword">if</span> (needRetry(throwable)) &#123;</span><br><span class="line">                                                <span class="comment">// condition ? 返回Observable.error，流终止，不再重试 : 返回一个延迟Observable，表示需要重试</span></span><br><span class="line">                                                <span class="keyword">return</span> time == retryConditions.get(retryConditions.size() - <span class="number">1</span>) ? Observable.error(<span class="keyword">new</span> <span class="title class_">RetryFailException</span>(throwable)) : Observable.timer(time, TimeUnit.SECONDS);</span><br><span class="line">                                            &#125;</span><br><span class="line">                                            <span class="comment">// 返回Observable.error，流终止，不再重试</span></span><br><span class="line">                                            <span class="keyword">return</span> Observable.error(throwable);</span><br><span class="line">                                        &#125;</span><br><span class="line">                                    &#125;);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Token过期刷新"><a href="#Token过期刷新" class="headerlink" title="Token过期刷新"></a><code>Token</code>过期刷新</h4><p>需求场景：</p>
+<ul>
+<li>用户登录成功后返回<code>refreshToken</code>和<code>accessToken</code>，<code>refreshToken</code>过期时间较长一般以年为单位，<code>accessToken</code>过期时间较短一般以分钟为单位</li>
+<li><code>accessToken</code>用于一般的接口请求时放到请求头里用于后端鉴权使用，<code>refreshToken</code>用于<code>accessToken</code>过期后调用刷新接口获取新的<code>accessToken</code>使用</li>
+<li><code>accessToken</code>过期时在用户层面是无感知的，需要在逻辑层自动做刷新然后业务接口重试，<code>refreshToken</code>过期需要弹出重新登录确认框。</li>
+</ul>
+<p>自动刷新<code>accessToken</code>后并重试网络请求的需求，这里实现方式有两种，分别是在<code>OkHttp</code>的自定义<code>Interceptor</code>里处理和<code>RxJava</code>的<code>retryWhen</code>操作符配合处理</p>
+<p><strong>自定义<code>Interceptor</code>：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TokenAuthenticatorInterceptor</span> <span class="keyword">implements</span> <span class="title class_">Interceptor</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">HTTP_EXPIRED_CODE</span> <span class="operator">=</span> ...;<span class="comment">// http 状态码，代表 token 过期</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">TOKEN_EXPIRED_CODE</span> <span class="operator">=</span> ...;<span class="comment">// token 过期错误码</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> TokenManager tokenManager;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">TokenAuthenticatorInterceptor</span><span class="params">(TokenManager tokenManager)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.tokenManager = tokenManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Response <span class="title function_">intercept</span><span class="params">(Chain chain)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">Request</span> <span class="variable">request</span> <span class="operator">=</span> chain.request();</span><br><span class="line">        <span class="comment">// 1. 给请求加上当前 AccessToken</span></span><br><span class="line">        <span class="type">Request</span> <span class="variable">authRequest</span> <span class="operator">=</span> request.newBuilder()</span><br><span class="line">            .header(<span class="string">&quot;Authorization&quot;</span>, <span class="string">&quot;Bearer &quot;</span> + tokenManager.getAccessToken())</span><br><span class="line">            .build();</span><br><span class="line">        <span class="type">Response</span> <span class="variable">response</span> <span class="operator">=</span> chain.proceed(authRequest);</span><br><span class="line">        <span class="comment">// 2. 检查是否token过期（如 401 未授权）</span></span><br><span class="line">        <span class="keyword">if</span> (isTokenExpired(response)) &#123;</span><br><span class="line">            response.close(); <span class="comment">// 关闭前一个响应</span></span><br><span class="line">            <span class="keyword">synchronized</span> (TokenManager.class) &#123;</span><br><span class="line">                <span class="keyword">return</span> retryWithRefreshedToken(chain, request);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> response;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">isTokenExpired</span><span class="params">(Response response)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (response.code() == <span class="number">200</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// restful风格的json数据</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">code</span> <span class="operator">=</span> ...<span class="comment">//读取body里的code字段</span></span><br><span class="line">        <span class="keyword">return</span> response.code() == HTTP_EXPIRED_CODE &amp;&amp; code == TOKEN_EXPIRED_CODE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Response <span class="title function_">retryWithRefreshedToken</span><span class="params">(Chain chain, Request request)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">// double check，避免多线程重复刷新</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">newToken</span> <span class="operator">=</span> tokenManager.getAccessToken();</span><br><span class="line">        <span class="keyword">if</span> (newToken.equals(tokenManager.getLastTriedToken())) &#123;</span><br><span class="line">            <span class="comment">// 触发刷新</span></span><br><span class="line">            newToken = tokenManager.refreshTokenBlocking();</span><br><span class="line">        &#125;</span><br><span class="line">        tokenManager.setLastTriedToken(newToken);</span><br><span class="line">        <span class="comment">// 3. 用新 token 重试一次</span></span><br><span class="line">        <span class="type">Request</span> <span class="variable">newRequest</span> <span class="operator">=</span> request.newBuilder()</span><br><span class="line">            .header(<span class="string">&quot;Authorization&quot;</span>, <span class="string">&quot;Bearer &quot;</span> + newToken)</span><br><span class="line">            .build();</span><br><span class="line">        <span class="keyword">return</span> chain.proceed(newRequest);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>刷新<code>token</code>要同步阻塞，否则多个线程会重复刷新（用<code>synchronized</code>保证）。</li>
+<li>只重试一次，避免陷入死循环，若刷新失败，应返回失败，不要死循环。</li>
+<li>刷新<code>token</code>的网络请求不要用当前带<code>Interceptor</code>的<code>OkHttpClient</code>，避免递归调用。</li>
+</ul>
+<p><strong><code>retryWhen</code>操作符：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Observable&lt;Data&gt; requestObservable = apiService.getServerData()</span><br><span class="line">    .compose(observableTransform());</span><br><span class="line"></span><br><span class="line">Observable&lt;Data&gt; refreshObservable = apiService.refreshToken()</span><br><span class="line">    .compose(observableTransform())</span><br><span class="line">    <span class="comment">// 该接口也可以根据情况进行重试</span></span><br><span class="line">    .compose(observableApiRetry(Arrays.asList(<span class="number">1</span>,<span class="number">2</span>)))</span><br><span class="line">    .doOnNext(<span class="keyword">new</span> <span class="title class_">Consumer</span>&lt;Token&gt; ()&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(Token token)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            tokenManager.setAccessToken(token.getAccessToken());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    .onErrorResumeNext(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Throwable, ObservableSource&lt;Data&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ObservableSource&lt;Data&gt; <span class="title function_">apply</span><span class="params">(Throwable throwable)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="comment">//在这里可以根据具体异常做一些处理，一般都是返回一个Observable.error终止retryWhen的重试操作</span></span><br><span class="line">            <span class="keyword">return</span> Observable.error(throwable);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">requestObservable</span><br><span class="line">    .retryWhen(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Observable&lt;Throwable&gt;, ObservableSource&lt;?&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> ObservableSource&lt;?&gt; apply(Observable&lt;Throwable&gt; throwableObservable) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="keyword">return</span> throwableObservable</span><br><span class="line">                .flatMap(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Throwable, ObservableSource&lt;?&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="keyword">public</span> ObservableSource&lt;?&gt; apply(Throwable throwable) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">                        <span class="comment">// TokenExpiredException 如果是http状态码401则需要在自定义Interceptor里抛出该异常，如果是Token过期业务码则由ApiResponse&lt;T&gt; -&gt; T 转换时传递出该异常</span></span><br><span class="line">                        <span class="keyword">if</span>(throwable <span class="keyword">instanceof</span> TokenExpiredException) &#123;</span><br><span class="line">                            <span class="keyword">return</span> refreshObservable;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">return</span> Observable.error(throwable);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)；</span><br></pre></td></tr></table></figure>
+
+<p>这两种方式都可以实现<code>token</code>过期自动刷新，但是在全局高并发的场景下并不能保证刷新<code>Token</code>操作同一时间只执行一次，需要做一些额外的处理，基本思想就是把<code>refreshToken</code>方法进行封装，然后用锁(synchronized&#x2F;Mutex)保护<strong>刷新的唯一性</strong>。</p>
+<h3 id="统一错误处理"><a href="#统一错误处理" class="headerlink" title="统一错误处理"></a>统一错误处理</h3><p>一些用户体验比较友好的应用会把应用使用过程中出现的<strong>错误</strong>体现在应用交互上，比如<code>Toast</code>、<code>Dialog</code>弹框或者特别的错误界面，这里的<strong>错误</strong>在数据层看来是发生了异常且大部分场景是在跟后台的交互过程中出现的，这时候需要做一些错误的统一处理，包括<strong>非<code>200</code>的网络状态码</strong>、<strong>网络请求失败</strong>、<strong>服务器特定错误码</strong>、<strong>数据解析错误</strong>、<strong>本地数据库异常</strong>、<strong>自定义业务异常</strong>等等，使用<code>RxJava</code>的另一个好处就是对异常的处理可以更加灵活，可以根据不同的情况做一些不同的处理，<strong>我做了如下举例：</strong></p>
+<ul>
+<li>在自定义<code>Interceptor</code>里根据<code>Http</code>状态码或者<code>json</code>数据里的业务码<code>throw</code>自定义异常</li>
+<li>在创建<code>Observable</code>的方法体里使用<code>emitter.onError</code>向下游传递异常</li>
+<li>在<code>ApiResponse&lt;T&gt;</code> -&gt; <code>T</code>转换时根据<code>json</code>数据里的业务码传递或者<code>throw</code>自定义异常</li>
+<li>针对个别<code>Observable</code>使用<code>onErrorXXX</code>系列接口处理异常</li>
+<li><code>Observer</code>实现<code>onError</code>处理异常，比如在<code>ViewModel</code>里使用<code>LiveData</code>向<code>UI</code>层传递<strong>显示对应状态</strong>的数据</li>
+<li><code>Observer</code>未实现<code>onError</code>，或者使用<code>RxJavaPlugins.onError(throwable)</code>都会向全局的<code>RxJavaPlugins.onErrorHandler</code>传递异常</li>
+</ul>
+<p>了解这些异常的发送、传递和处理的场景后我们接下来实现一个<code>refreshToken</code>过期后弹出<strong>重新登录</strong>弹框的案例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在自定义`Interceptor`里抛出异常：</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">USER_EXPIRED_CODE</span> <span class="operator">=</span> ...;<span class="comment">// 用户登录过期错误码</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> Response <span class="title function_">intercept</span><span class="params">(Interceptor.Chain chain)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">Response</span> <span class="variable">response</span> <span class="operator">=</span> chain.proceed(chain.request());</span><br><span class="line">    <span class="keyword">if</span> (response.code() == <span class="number">401</span>) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">code</span> <span class="operator">=</span> ...<span class="comment">//读取body里的code字段</span></span><br><span class="line">        <span class="keyword">if</span>(code == USER_EXPIRED_CODE) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">LoginExpiredException</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 或者 ApiResposne&lt;T&gt; -&gt; T 转换时识别并传递该异常</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">Transformer</span>&lt;ApiResponse&lt;T&gt;, T&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Observable&lt;T&gt; <span class="title function_">call</span><span class="params">(Observable&lt;ApiResponse&lt;T&gt;&gt; observable)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> observable.flatMap(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;ApiResponse&lt;T&gt;, Observable&lt;T&gt;&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> Observable&lt;T&gt; <span class="title function_">apply</span><span class="params">(ApiResponse&lt;T&gt; apiResponse)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">                <span class="keyword">if</span> (apiResponse.getCode() == USER_EXPIRED_CODE) &#123;</span><br><span class="line">                    <span class="keyword">return</span> Observable.error(<span class="keyword">new</span> <span class="title class_">LoginExpiredException</span>());</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> Observable.just(apiResponse.getData());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在封装的<code>Observer</code>中统一处理，或者<code>Result</code>包裹类转换时处理</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义Result类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Result</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="meta">@NonNull</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> Status status;</span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> T data;</span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> Error error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">Result</span><span class="params">(<span class="meta">@NonNull</span> Status status, <span class="meta">@Nullable</span> T data, <span class="meta">@Nullable</span> Error error)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.status = status;</span><br><span class="line">        <span class="built_in">this</span>.data = data;</span><br><span class="line">        <span class="built_in">this</span>.error = error;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isSuccess</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> status == Status.SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; Result&lt;T&gt; <span class="title function_">success</span><span class="params">(<span class="meta">@NonNull</span> T data)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Result</span>&lt;&gt;(Status.SUCCESS, data, <span class="literal">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; Result&lt;T&gt; <span class="title function_">error</span><span class="params">(Error error)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Result</span>&lt;&gt;(Status.ERROR, <span class="literal">null</span>, error);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在<code>Transformer</code>中处理：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="title class_">ObservableTransformer</span>&lt;T, Result&lt;T&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Observable&lt;Result&lt;T&gt;&gt; <span class="title function_">call</span><span class="params">(Observable&lt;T&gt; observable)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> observable</span><br><span class="line">        .map(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;T, Result&lt;T&gt;&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> Result&lt;T&gt; <span class="title function_">apply</span><span class="params">(T t)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">                <span class="keyword">return</span> Result.success(t);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .onErrorReturn(<span class="keyword">new</span> <span class="title class_">Function</span>&lt;Throwable, Result&lt;T&gt;&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> Result&lt;T&gt; <span class="title function_">apply</span><span class="params">(Throwable throwable)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">                <span class="keyword">if</span>(throwable <span class="keyword">instanceof</span> LoginExpiredException) &#123;</span><br><span class="line">                    RxJavaPlugins.onError(throwable);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> Result.error(throwableMappingToError(throwable));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在<code>Application</code>中设置全局<code>setErrorHandler</code>：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">RxJavaPlugins.setErrorHandler(<span class="keyword">new</span> <span class="title class_">Consumer</span>&lt;Throwable&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(Throwable throwable)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (throwable <span class="keyword">instanceof</span> LoginExpiredException) &#123;</span><br><span class="line">            <span class="comment">// 弹出重新登录弹框, 同一时间可能会有多个异常到来，需要做防抖/节流处理和线程切换</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>ReactiveX</code>函数式编程是一种思想，<code>RxJava</code>只是这种思想在<code>Java</code>语言方面的实现，其它语言上也有体现像<code> RxSwift</code>、<code>RxJs </code>和<code>RxDart</code>等，想要掌握<code>RxJava</code>除了熟悉它的基本概念、常用操作符以及这些操作符的组合外，更要了解它的编程思想，这也是我对<code>RxJava</code>接下来的学习的主要目标。<br><code>RxJava</code>用的好当然就是<strong>神兵利器</strong>，效率和简洁代码上都会有很大的提升，但相对的缺点是入门比较难，使用不当会引发一些比较严重的问题，如果链式调用比较长同样也会增加出现问题后的排查难度，在使用的过程中要有意识的去规避一些潜在的问题。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ReactiveX/" rel="tag"># ReactiveX</a>
+              <a href="/tags/%E5%87%BD%E6%95%B0%E5%BC%8F%E5%8F%98%E7%BC%96%E7%A8%8B/" rel="tag"># 函数式变编程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/05/android-anr-optimize/" rel="prev" title="Android 性能优化之卡顿优化">
+      <i class="fa fa-chevron-left"></i> Android 性能优化之卡顿优化
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E5%90%88-Retrofit"><span class="nav-number">1.</span> <span class="nav-text">结合 Retrofit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E9%80%BB%E8%BE%91%E5%A4%8D%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">通用逻辑复用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E6%B5%81%E4%B8%8E%E9%98%B2%E6%8A%96"><span class="nav-number">3.</span> <span class="nav-text">节流与防抖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B2%E8%A1%8C-%E5%B9%B6%E8%A1%8C%E8%AF%B7%E6%B1%82"><span class="nav-number">4.</span> <span class="nav-text">串行&#x2F;并行请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98-%E5%86%85%E5%AD%98%E7%BC%93%E5%AD%98"><span class="nav-number">5.</span> <span class="nav-text">磁盘&#x2F;内存缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AE%E8%AF%A2%E8%AF%B7%E6%B1%82%E6%8E%A5%E5%8F%A3"><span class="nav-number">6.</span> <span class="nav-text">轮询请求接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E9%87%8D%E8%AF%95"><span class="nav-number">7.</span> <span class="nav-text">业务重试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%94%99%E8%AF%AF%E9%87%8D%E8%AF%95"><span class="nav-number">7.1.</span> <span class="nav-text">网络错误重试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Token%E8%BF%87%E6%9C%9F%E5%88%B7%E6%96%B0"><span class="nav-number">7.2.</span> <span class="nav-text">Token过期刷新</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%9F%E4%B8%80%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="nav-number">8.</span> <span class="nav-text">统一错误处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

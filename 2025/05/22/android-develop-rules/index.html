@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近在组内分享一些提升组员开发能力的文章，起因是去年我刚加入公司时重做了一款内部自研的项目，正好这个项目最近也接近尾声，领导希望我参照新旧项目的对比，把我在重构过程中运用的一些实用开发技能给分享出来，来帮助其他开发人员提升开发能力，命名规范是其中比较基础且重要的部分，下面就做一些简单的总结。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android开发过程中的命名规范">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/05/22/android-develop-rules/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="最近在组内分享一些提升组员开发能力的文章，起因是去年我刚加入公司时重做了一款内部自研的项目，正好这个项目最近也接近尾声，领导希望我参照新旧项目的对比，把我在重构过程中运用的一些实用开发技能给分享出来，来帮助其他开发人员提升开发能力，命名规范是其中比较基础且重要的部分，下面就做一些简单的总结。">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-05-22T02:06:49.000Z">
+<meta property="article:modified_time" content="2025-06-18T14:55:38.160Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="U开发规范">
+<meta property="article:tag" content="命名规范">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/05/22/android-develop-rules/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>Android开发过程中的命名规范 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/05/22/android-develop-rules/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android开发过程中的命名规范
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-05-22 10:06:49" itemprop="dateCreated datePublished" datetime="2025-05-22T10:06:49+08:00">2025-05-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">Android开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在组内分享一些提升组员开发能力的文章，起因是去年我刚加入公司时重做了一款内部自研的项目，正好这个项目最近也接近尾声，领导希望我参照新旧项目的对比，把我在重构过程中运用的一些实用开发技能给分享出来，来帮助其他开发人员提升开发能力，命名规范是其中比较基础且重要的部分，下面就做一些简单的总结。</p>
+<span id="more"></span>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>Android 开发规范涉及到很多方面，包括 Android Stuido 规范、命名规范、代码样式规范、注释规范和测试规范等，这里我列举列其中比较常用的部分也就是 Android 项目涉及到的各种命名规范。通过这些规范去统一项目的整体风格。</p>
+<h3 id="模块及包名命名"><a href="#模块及包名命名" class="headerlink" title="模块及包名命名"></a>模块及包名命名</h3><p>这里的模块是指 Android Studio 里的 module，对项目做模块化拆分时会用到</p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>类别</strong></th>
+<th align="left"><strong>具体规则</strong></th>
+<th align="left"><strong>举例说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">模块名</td>
+<td align="left">全部小写，连续的单词可以用“-”连接，也可以根据<br />文件夹去分类，主要传达出简洁，明确的信息</td>
+<td align="left">core-common,core-storage,feature-mian 等或者<br /> core&#x2F;common,core&#x2F;storage,feature&#x2F;main 等</td>
+</tr>
+<tr>
+<td align="center">包名</td>
+<td align="left">反域名命名规则，全部小写，连续的单词只是简单地连接起来，不使用下划线</td>
+<td align="left">1.一级包名是顶级域名，通常为 com、edu、gov、net、org 等<br/>2.二级包名为公司名<br />3.三级包名根据应用进行命名<br/>4.更多级别的包名则根据 PBF 来划分（按功能分包 Package By Feature）</td>
+</tr>
+</tbody></table>
+<p>PBF 分包有诸多好处，例如:</p>
+<ul>
+<li>包内高内聚，包间低耦合，包内的类可以进行高度抽象</li>
+<li>包内有私有作用域（package-private scope），避免不同包名下的类交叉调用</li>
+<li>容易管理，如果后期功能不再使用可以连同包名一同移除</li>
+<li>可以在此基础上进一步的进行模块化</li>
+</ul>
+<h3 id="类、字段和方法命名"><a href="#类、字段和方法命名" class="headerlink" title="类、字段和方法命名"></a>类、字段和方法命名</h3><table>
+<thead>
+<tr>
+<th align="center"><strong>类别</strong></th>
+<th align="left"><strong>具体规则</strong></th>
+<th align="left"><strong>举例说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">类名</td>
+<td align="left">基本上采用大驼峰命名法，尽量避免缩写，除非大家一些熟知的像 UML、URL 等且都是大写</td>
+<td align="left">四大组件：以对应的 Activity、Service、Receiver 和 Provider 结尾<br/>共享的基础类：以 Base 开头，像 BaseActivity、BaseFragment、BaseAdapter 等<br/>其它等都是以固有名词结尾，像工具类 Utils、适配器类 Adapter、解析类 Parser 和测试类 Test 等</td>
+</tr>
+<tr>
+<td align="center">方法名</td>
+<td align="left">采用小驼峰命名法，也就是 lowerCamelCase 风格，一些场景下拥有固有的前缀或后缀</td>
+<td align="left">初始化相关：initXX(), <br/>返回值为 boolean 类型的：isXX()或 checkXX(),<br/>一个字段的 get&#x2F;set：getXX()&#x2F;setXX(), <br/>数据处理：handleXX()或 processXX(),<br/>弹出框或提示：displayXX()&#x2F;showXX(),<br/>数据的 CURD：插入或保存 - insertXX()&#x2F;saveXX(), 更新 - updateXX(), 重置 - resetXX(), 清除 - clearXX(), 移除 - removeXX()&#x2F;deleteXX()<br/>绘制数据或效果相关：drawXXX()</td>
+</tr>
+<tr>
+<td align="center">字段名</td>
+<td align="left">常量一般都是 static final 字段，全部大写且以下划线分割，非常量字段则是 lowerCamelCase 风格</td>
+<td align="left">常量表示一个实例是不可变的，这种情况下则用大写表示，如果是可变的则不是常量，比如用 static final 表示的内容可变的 List、Set 或 Map 等，则不必用大写<br/>非常量字段根据修饰符和用途会有所不一样，比如：<br/>1. 非公有且非静态字段一般以 m 开头<br/>2. 静态字段命名以 s 开头<br/>3. Andrdoid 控件为了和普通成员变量区分，一般以控件缩写作为前缀</td>
+</tr>
+<tr>
+<td align="center">其它</td>
+<td align="left">这里方法参数名和局部变量名按照 lowerCamelCase 风格编写，临时变量简单即可</td>
+<td align="left">除了临时变量和循环变量，参数名和局部变量名应避免使用单字符进行命名</td>
+</tr>
+</tbody></table>
+<p>关于 Java 命名规范还可以参考 <a target="_blank" rel="noopener" href="https://github.com/alibaba/p3c/blob/master/Java%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C(%E9%BB%84%E5%B1%B1%E7%89%88).pdf">阿里巴巴 Java 开发手册</a></p>
+<p>这里额外说一下<strong>代码样式规范</strong>，这个规范没有唯一的答案，尽量往提高代码可读性方向去做，比如类和方法的行数一般都不建议太长，太长的话就是需要做<strong>重构</strong>的标志了，下面是类成员在类中的排列顺序的推荐写法</p>
+<ol>
+<li>常量</li>
+<li>字段</li>
+<li>构造函数</li>
+<li>重写函数和回调</li>
+<li>公有函数</li>
+<li>私有函数</li>
+<li>内部类或接口</li>
+</ol>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">Activity</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">TAG</span> <span class="operator">=</span> MainActivity.class.getSimpleName();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String mTitle;</span><br><span class="line">    <span class="keyword">private</span> TextView mTvTitle;<span class="comment">// 或者tvTitle</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">()</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setTitle</span><span class="params">(String title)</span> &#123;</span><br><span class="line">    	mTitle = title;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">setUpView</span><span class="params">()</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">AnInnerClass</span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果类继承于 Android 组件（例如 Activity 或 Fragment），那么把重写函数按照他们的生命周期进行排序是一个非常好的习惯，例如，Activity 实现了 onCreate()、onDestroy()、onPause()、onResume()，它的正确排序如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">Activity</span> &#123;</span><br><span class="line">    <span class="comment">//Order matches Activity lifecycle</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">()</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onResume</span><span class="params">()</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onPause</span><span class="params">()</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onDestroy</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="资源命名"><a href="#资源命名" class="headerlink" title="资源命名"></a>资源命名</h3><table>
+<thead>
+<tr>
+<th align="left"><strong>类别</strong></th>
+<th align="left"><strong>具体规则</strong></th>
+<th align="left"><strong>举例说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">anim&#x2F;</td>
+<td align="left">{模块名_}+逻辑名称</td>
+<td align="left">逻辑名称可有多个单词加下划线组成，例如：淡入 - fade_in, 滑动进入 - slide_in 等</td>
+</tr>
+<tr>
+<td align="left">color&#x2F;</td>
+<td align="left">类型+{<em>模块名</em>}+逻辑名称</td>
+<td align="left">{} 中的内容可选，例如：sel_btn_font</td>
+</tr>
+<tr>
+<td align="left">drawable&#x2F;</td>
+<td align="left">类型+{<em>模块名</em>}+逻辑名称或者<br/>类型+{<em>模块名</em>}+颜色</td>
+<td align="left">res&#x2F;drawable 目录下存放位图文件（.png、.9.png、.jpg、.gif）或编译为可绘制对象资源子类型的 XML 文件，而 res&#x2F;mipmap 目录放的是不同屏幕密度下的启动图标<br/><strong>类型</strong>可以是可绘制对象资源类型（selector、shape 或 layer-list 等），也可以是控件类型，最后可加后缀_small 表示小图，_big 表示大图<br/>例如：btn_main_about,btn_back,ic_search,bg_home 等</td>
+</tr>
+<tr>
+<td align="left">layout&#x2F;</td>
+<td align="left">类型+{<em>模块名</em>}+逻辑名称</td>
+<td align="left">{}中的内容可选，类型主要有：activity、fragment、dialog、item 等，自定义控件以 view、layout 或 widget 等为前缀</td>
+</tr>
+<tr>
+<td align="left">values&#x2F;colors</td>
+<td align="left">根据项目实际情况决定</td>
+<td align="left">如果以控件类型命名则不可避免的会有重复，一般来讲会按设计图上的定义来</td>
+</tr>
+<tr>
+<td align="left">values&#x2F;dimens</td>
+<td align="left">根据项目实际情况决定</td>
+<td align="left">这个很难避免重复，一般也是根据设计图来定义，尽量做到通用不重复，比如 margin 和 padding 可以用 spacing_前缀定义</td>
+</tr>
+<tr>
+<td align="left">values&#x2F;strings</td>
+<td align="left">{模块名_}+逻辑名称</td>
+<td align="left">一般同一页面下的 string 定义到一起，这样方便查找</td>
+</tr>
+<tr>
+<td align="left">values&#x2F;styles</td>
+<td align="left">使用大驼峰命名法</td>
+<td align="left">一般项目有一个通用的 sytles.xml 文件，同样需要根据设计图来总结出通用的 style，像标题，正文，描述，按钮等等这些拥有相同的 size 或 color 的可以使用同一 style</td>
+</tr>
+</tbody></table>
+<p>values 下的资源文件命名一般是以 s 结尾，也可以根据模块进行划分，比如 colors_home.xml、strings_main.xml 等</p>
+<h3 id="控件-ID-命名"><a href="#控件-ID-命名" class="headerlink" title="控件 ID 命名"></a>控件 ID 命名</h3><p>id 命名规则：控件缩写 + {模块名} + 页面功能名，{}的内容是可选的， 比如：tv_main_title, iv_search,btn_back 等下面是 UI 控件缩写表</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>名称</strong></th>
+<th align="left"><strong>缩写</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Button</td>
+<td align="left">btn</td>
+</tr>
+<tr>
+<td align="left">CheckBox</td>
+<td align="left">cb</td>
+</tr>
+<tr>
+<td align="left">EditText</td>
+<td align="left">et</td>
+</tr>
+<tr>
+<td align="left">FrameLayout</td>
+<td align="left">fl</td>
+</tr>
+<tr>
+<td align="left">GridView</td>
+<td align="left">gv</td>
+</tr>
+<tr>
+<td align="left">ImageButton</td>
+<td align="left">ib</td>
+</tr>
+<tr>
+<td align="left">ImageView</td>
+<td align="left">iv</td>
+</tr>
+<tr>
+<td align="left">LinearLayout</td>
+<td align="left">ll</td>
+</tr>
+<tr>
+<td align="left">ListView</td>
+<td align="left">lv</td>
+</tr>
+<tr>
+<td align="left">ProgressBar</td>
+<td align="left">pb</td>
+</tr>
+<tr>
+<td align="left">RadioButtion</td>
+<td align="left">rb</td>
+</tr>
+<tr>
+<td align="left">RecyclerView</td>
+<td align="left">rv</td>
+</tr>
+<tr>
+<td align="left">RelativeLayout</td>
+<td align="left">rl</td>
+</tr>
+<tr>
+<td align="left">ScrollView</td>
+<td align="left">sv</td>
+</tr>
+<tr>
+<td align="left">SeekBar</td>
+<td align="left">sb</td>
+</tr>
+<tr>
+<td align="left">Spinner</td>
+<td align="left">spn</td>
+</tr>
+<tr>
+<td align="left">TextView</td>
+<td align="left">tv</td>
+</tr>
+<tr>
+<td align="left">ToggleButton</td>
+<td align="left">tb</td>
+</tr>
+<tr>
+<td align="left">VideoView</td>
+<td align="left">vv</td>
+</tr>
+<tr>
+<td align="left">WebView</td>
+<td align="left">wv</td>
+</tr>
+<tr>
+<td align="left">ConstraintLayout</td>
+<td align="left">cl</td>
+</tr>
+</tbody></table>
+<p>包括自定义控件或者 Google 官方后续新出的控件，控件的缩写都是首字母小写拼在一起，如果跟已有的控件缩写重复则多添加一个单词做区分</p>
+<p>另外还有通用的单词缩写：</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>名称</strong></th>
+<th align="left"><strong>缩写</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">average</td>
+<td align="left">avg</td>
+</tr>
+<tr>
+<td align="left">background</td>
+<td align="left">bg</td>
+</tr>
+<tr>
+<td align="left">buffer</td>
+<td align="left">buf</td>
+</tr>
+<tr>
+<td align="left">control</td>
+<td align="left">ctrl</td>
+</tr>
+<tr>
+<td align="left">current</td>
+<td align="left">cur</td>
+</tr>
+<tr>
+<td align="left">default</td>
+<td align="left">def</td>
+</tr>
+<tr>
+<td align="left">delete</td>
+<td align="left">del</td>
+</tr>
+<tr>
+<td align="left">document</td>
+<td align="left">doc</td>
+</tr>
+<tr>
+<td align="left">error</td>
+<td align="left">err</td>
+</tr>
+<tr>
+<td align="left">escape</td>
+<td align="left">esc</td>
+</tr>
+<tr>
+<td align="left">icon</td>
+<td align="left">ic</td>
+</tr>
+<tr>
+<td align="left">increment</td>
+<td align="left">inc</td>
+</tr>
+<tr>
+<td align="left">information</td>
+<td align="left">info</td>
+</tr>
+<tr>
+<td align="left">initial</td>
+<td align="left">init</td>
+</tr>
+<tr>
+<td align="left">image</td>
+<td align="left">img</td>
+</tr>
+<tr>
+<td align="left">Internationalization</td>
+<td align="left">I18N</td>
+</tr>
+<tr>
+<td align="left">length</td>
+<td align="left">len</td>
+</tr>
+<tr>
+<td align="left">library</td>
+<td align="left">lib</td>
+</tr>
+<tr>
+<td align="left">message</td>
+<td align="left">msg</td>
+</tr>
+<tr>
+<td align="left">password</td>
+<td align="left">pwd</td>
+</tr>
+<tr>
+<td align="left">position</td>
+<td align="left">pos</td>
+</tr>
+<tr>
+<td align="left">previous</td>
+<td align="left">pre</td>
+</tr>
+<tr>
+<td align="left">selector</td>
+<td align="left">sel</td>
+</tr>
+<tr>
+<td align="left">server</td>
+<td align="left">srv</td>
+</tr>
+<tr>
+<td align="left">string</td>
+<td align="left">str</td>
+</tr>
+<tr>
+<td align="left">temporary</td>
+<td align="left">tmp</td>
+</tr>
+<tr>
+<td align="left">window</td>
+<td align="left">win</td>
+</tr>
+</tbody></table>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>开发规范是一个团队在开发过程中需要达成共识的部分，可以有效的降低项目维护成本和团队成员之间的沟通成本，提高项目代码可读性，其中命名规范是其中比较重要的一部分。</p>
+<p>上面所列举的命名规范细则是比较通用的部分，实际开发过程中肯定要掺杂一些个人的开发习惯与偏好，另外还需要根据项目的类型、开发周期、人员配置和项目要求等等做一些调整，可以采用项目负责人主导制，一个项目要有一个主要负责人，这个项目后期大概率由这个人负责开发和维护，那么关于开发规范方面则主要由这个负责人主导。其他人的代码要经过负责人审核，来匹配项目的整体风格。</p>
+<p>更多细节部分可参考掘金文章 <a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903518776590349">Android 开发规范</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/U%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83/" rel="tag"># U开发规范</a>
+              <a href="/tags/%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83/" rel="tag"># 命名规范</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/22/booslink-technology-practice/" rel="prev" title="个人技术心得分享">
+      <i class="fa fa-chevron-left"></i> 个人技术心得分享
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/28/android-recyclerview-diffutil/" rel="next" title="DiffUtil优化RecyclerView数据加载">
+      DiffUtil优化RecyclerView数据加载 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8F%8A%E5%8C%85%E5%90%8D%E5%91%BD%E5%90%8D"><span class="nav-number">2.</span> <span class="nav-text">模块及包名命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E3%80%81%E5%AD%97%E6%AE%B5%E5%92%8C%E6%96%B9%E6%B3%95%E5%91%BD%E5%90%8D"><span class="nav-number">3.</span> <span class="nav-text">类、字段和方法命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E5%91%BD%E5%90%8D"><span class="nav-number">4.</span> <span class="nav-text">资源命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A7%E4%BB%B6-ID-%E5%91%BD%E5%90%8D"><span class="nav-number">5.</span> <span class="nav-text">控件 ID 命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
