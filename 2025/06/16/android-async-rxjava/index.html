@@ -28,7 +28,7 @@
 <meta property="og:description" content="个人使用RxJava接近十年，是国内比较早的一批把RxJava做为主要技术栈的Android开发者，一些在当时看来比较复杂的业务逻辑，最后都通过RxJava的操作符解决，包括后面开发语言切换到kotlin后使用协程做异步开发，我个人也比较偏向于使用Flow这个跟RxJava很像的数据流式操作框架。现如今开发语言又切回到Java，对Rxjava的使用场景也更丰富了，下面简单介绍一下我用RxJava在">
 <meta property="og:locale">
 <meta property="article:published_time" content="2025-06-16T03:20:49.000Z">
-<meta property="article:modified_time" content="2025-06-18T14:40:52.787Z">
+<meta property="article:modified_time" content="2025-07-03T14:02:01.363Z">
 <meta property="article:author" content="szhangbiao">
 <meta property="article:tag" content="ReactiveX">
 <meta property="article:tag" content="函数式变编程">
@@ -337,7 +337,8 @@
 <p><strong>在<code>Application</code>中设置全局<code>setErrorHandler</code>：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">RxJavaPlugins.setErrorHandler(<span class="keyword">new</span> <span class="title class_">Consumer</span>&lt;Throwable&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(Throwable throwable)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (throwable <span class="keyword">instanceof</span> LoginExpiredException) &#123;</span><br><span class="line">            <span class="comment">// 弹出重新登录弹框, 同一时间可能会有多个异常到来，需要做防抖/节流处理和线程切换</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>ReactiveX</code>函数式编程是一种思想，<code>RxJava</code>只是这种思想在<code>Java</code>语言方面的实现，其它语言上也有体现像<code> RxSwift</code>、<code>RxJs </code>和<code>RxDart</code>等，想要掌握<code>RxJava</code>除了熟悉它的基本概念、常用操作符以及这些操作符的组合外，更要了解它的编程思想，这也是我对<code>RxJava</code>接下来的学习的主要目标。<br><code>RxJava</code>用的好当然就是<strong>神兵利器</strong>，效率和简洁代码上都会有很大的提升，但相对的缺点是入门比较难，使用不当会引发一些比较严重的问题，如果链式调用比较长同样也会增加出现问题后的排查难度，在使用的过程中要有意识的去规避一些潜在的问题。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>ReactiveX</code>函数式编程是一种思想，<code>RxJava</code>只是这种思想在<code>Java</code>语言方面的实现，其它语言上也有体现像<code> RxSwift</code>、<code>RxJs </code>和<code>RxDart</code>等，想要掌握<code>RxJava</code>除了熟悉它的基本概念、常用操作符以及这些操作符的组合外，更要了解它的编程思想，这也是我对<code>RxJava</code>接下来的学习的主要目标。</p>
+<p><code>RxJava</code>用的好当然就是<strong>神兵利器</strong>，效率和简洁代码上都会有很大的提升，但相对的缺点是入门比较难，使用不当会引发一些比较严重的问题，如果链式调用比较长同样也会增加出现问题后的排查难度，在使用的过程中要有意识的去规避一些潜在的问题。</p>
 
     </div>
 
@@ -458,7 +459,7 @@
         <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
       </span>
       <span class="links-of-author-item">
-        <a href="https://szhangbiao.github.io/resume" title="Resume → https:&#x2F;&#x2F;szhangbiao.github.io&#x2F;resume"><i class="fa fa-fw fa-globe"></i>Resume</a>
+        <a href="https://twitter.com/szhangbiao" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
       </span>
   </div>
 
