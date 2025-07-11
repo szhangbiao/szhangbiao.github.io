@@ -161,6 +161,80 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/07/02/android-constraintlayout-optimize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/07/02/android-constraintlayout-optimize/" class="post-title-link" itemprop="url">解决使用ConstraintLayout不当而引起的卡顿</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-07-02 20:06:49" itemprop="dateCreated datePublished" datetime="2025-07-02T20:06:49+08:00">2025-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>优化页面渲染速度的一个方向是<strong>简化布局</strong>和<strong>减少嵌套</strong>，<code>ConstraintLayout</code>的特性很适合处理这方面的优化，一直以来我也是尽可能的在各种场景下使用<code>ConstraintLayout</code>，保证<code>Fragment</code>页面或者 <code>RecyclerView</code>的<code>ViewHolder</code>里的<code>itemView</code>中只有一个布局，但是最近在适配新的<code>开发板</code>设备过程中，个别页面打开速度出现比较严重的卡顿并在<code>logcat</code>里打印了<code>ANR Warning</code>日志，从而让我定位到了卡顿的元凶是<code>ConstraintLayout</code>的<code>onLayout</code>和<code>onMeasure</code>方法，这篇文章就是记录该问题出现和解决的过程。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/07/02/android-constraintlayout-optimize/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/06/16/android-async-rxjava/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -823,80 +897,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2024/11/10/booslink-image-loader/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
-      <meta itemprop="name" content="szhangbiao">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Szhangbiao's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/11/10/booslink-image-loader/" class="post-title-link" itemprop="url">图片加载框架封装（Fresco和Glide）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2024-11-10 16:10:49" itemprop="dateCreated datePublished" datetime="2024-11-10T16:10:49+08:00">2024-11-10</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Fresco 其实是我司长期以来默认使用的图片加载框架，这个情况在 4 月份我在做新项目的技术选型的时候被打破了，那时我针对 Glide vs Fresco 的性能做了对比，在加载 GIF 的情况下，Glide + <a target="_blank" rel="noopener" href="https://github.com/koral--/android-gif-drawable">GifDrawable 三方库</a>在内存和 CPU 上要优于 Fresco，所以领导就拍板决定在新版项目里使用 Glide, 但这个情况在后面发生了一些变化。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/11/10/booslink-image-loader/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -968,7 +968,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -981,7 +981,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-count">51</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>

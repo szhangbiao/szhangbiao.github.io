@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"szhangbiao.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="优化页面渲染速度的一个方向是简化布局和减少嵌套，ConstraintLayout的特性很适合处理这方面的优化，一直以来我也是尽可能的在各种场景下使用ConstraintLayout，保证Fragment页面或者 RecyclerView的ViewHolder里的itemView中只有一个布局，但是最近在适配新的开发板设备过程中，个别页面打开速度出现比较严重的卡顿并在logcat里打印了ANR Wa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决使用ConstraintLayout不当而引起的卡顿">
+<meta property="og:url" content="https://szhangbiao.github.io/2025/07/02/android-constraintlayout-optimize/index.html">
+<meta property="og:site_name" content="Szhangbiao&#39;s blog">
+<meta property="og:description" content="优化页面渲染速度的一个方向是简化布局和减少嵌套，ConstraintLayout的特性很适合处理这方面的优化，一直以来我也是尽可能的在各种场景下使用ConstraintLayout，保证Fragment页面或者 RecyclerView的ViewHolder里的itemView中只有一个布局，但是最近在适配新的开发板设备过程中，个别页面打开速度出现比较严重的卡顿并在logcat里打印了ANR Wa">
+<meta property="og:locale">
+<meta property="og:image" content="https://szhangbiao.github.io/images/home-page-prototype.png">
+<meta property="article:published_time" content="2025-07-02T12:06:49.000Z">
+<meta property="article:modified_time" content="2025-07-11T19:43:47.966Z">
+<meta property="article:author" content="szhangbiao">
+<meta property="article:tag" content="ConstraintLayout">
+<meta property="article:tag" content="布局优化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://szhangbiao.github.io/images/home-page-prototype.png">
+
+<link rel="canonical" href="https://szhangbiao.github.io/2025/07/02/android-constraintlayout-optimize/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>解决使用ConstraintLayout不当而引起的卡顿 | Szhangbiao's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Szhangbiao's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录一些让自己可以回忆的东西</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="https://szhangbiao.github.io/2025/07/02/android-constraintlayout-optimize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/wechat_qrcode.jpg">
+      <meta itemprop="name" content="szhangbiao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Szhangbiao's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          解决使用ConstraintLayout不当而引起的卡顿
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-07-02 20:06:49" itemprop="dateCreated datePublished" datetime="2025-07-02T20:06:49+08:00">2025-07-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>优化页面渲染速度的一个方向是<strong>简化布局</strong>和<strong>减少嵌套</strong>，<code>ConstraintLayout</code>的特性很适合处理这方面的优化，一直以来我也是尽可能的在各种场景下使用<code>ConstraintLayout</code>，保证<code>Fragment</code>页面或者 <code>RecyclerView</code>的<code>ViewHolder</code>里的<code>itemView</code>中只有一个布局，但是最近在适配新的<code>开发板</code>设备过程中，个别页面打开速度出现比较严重的卡顿并在<code>logcat</code>里打印了<code>ANR Warning</code>日志，从而让我定位到了卡顿的元凶是<code>ConstraintLayout</code>的<code>onLayout</code>和<code>onMeasure</code>方法，这篇文章就是记录该问题出现和解决的过程。</p>
+<span id="more"></span>
+
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>我目前所开发的项目在某种程度上来说也算得上是大屏<code>TV</code>类的<code>Android</code>开发，特点就是一些特殊页面控件元素众多，为了防止这些<code>View</code>元素出现布局嵌套整个页面就一个<code>ConstraintLayout</code>，开发完后的感受就是打开页面时会在视觉上有滞后感，也就是<code>UI</code>卡顿。不过这个问题当时并没有成为严重到<strong>APP</strong>不能使用的地步，前段时间也专门抽出一些时间做专项优化治理，优化手段包括代码代替<code>xml</code>创建布局、优化列表数据加载、<code>View</code>缓存复用和异步加载等等，直接体现就是<code>Fragment</code>的各个生命周期执行时间得到明显的缩短。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Fragment XXXFragment Total duration from onFragmentPreCreated to onFragmentCreated: 4ms</span><br><span class="line">Fragment XXXFragment Total duration from onFragmentCreated to onFragmentViewCreated: 78ms</span><br><span class="line">Fragment XXXFragment Total duration from onFragmentViewCreated to onFragmentStarted: 4ms</span><br><span class="line">Fragment XXXFragment Total duration from onFragmentStarted to onFragmentResumed: 46ms</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>卡顿问题有所缓解却没有得到根治，直到最近在适配<code>Android 5.1</code>系统的新设备，卡顿问题在该设备上被放大且伴有<code>logcat</code>的<code>ANR Warning</code>日志，这让我发现了新的优化方向，让我比较意外的是<code>ConstraintLayout</code>这一我在任何开发场景都比较推崇使用的布局在一些场景下也有局限性，物极必反的道理也在其中有很好的体现。</p>
+<h3 id="问题分析及解决"><a href="#问题分析及解决" class="headerlink" title="问题分析及解决"></a>问题分析及解决</h3><p>目前出现<code>ANR Warning</code>日志的页面主要有两例，下面就来介绍详细情况跟相关的日志。</p>
+<h4 id="1-onMeasure方法卡顿"><a href="#1-onMeasure方法卡顿" class="headerlink" title="1. onMeasure方法卡顿"></a>1. <code>onMeasure</code>方法卡顿</h4><p>该场景下发生卡顿的原因是<code>ConstraintLayout</code>下的直接子<code>View</code>众多，<strong>减少嵌套</strong>这种优化在我看来最好是没有嵌套，页面中所有的元素都在一个<code>Layout</code>中，当页面展示动态数据时就会有以下日志打印：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[ANR Warning]onMeasure time too long, this =androidx.constraintlayout.widget.ConstraintLayout&#123;5e6add4 V.E..... ......I. 0,0-0,0&#125;time =1437 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.fragment.app.FragmentContainerView&#123;eaa1c88 V.E..... ......ID 0,0-1280,800 #7f090217 app:id/nav_host_fragment&#125;time =1438 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.fragment.app.FragmentContainerView&#123;252346b2 V.E..... ......ID 0,0-1280,800 #7f090217 app:id/nav_host_fragment&#125;time =1438 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.appcompat.widget.ContentFrameLayout&#123;384e6e26 V.E..... ......ID 0,0-1280,800 #1020002 android:id/content&#125;time =1438 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.appcompat.widget.FitWindowsLinearLayout&#123;21c3908b V.E..... ......ID 0,0-1280,800 #7f090038 app:id/action_bar_root&#125;time =1438 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =android.widget.FrameLayout&#123;1311434e V.E..... ......ID 0,0-1280,800&#125;time =1439 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =android.widget.LinearLayout&#123;2ee80c50 V.E..... ......ID 0,0-1280,800&#125;time =1439 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =com.android.internal.policy.impl.PhoneWindow$DecorView&#123;363775e4 V.E..... R.....ID 0,0-1280,800&#125;time =1440 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.constraintlayout.widget.ConstraintLayout&#123;5e6add4 V.E..... ......I. 0,0-0,0&#125;time =1333 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.fragment.app.FragmentContainerView&#123;eaa1c88 V.E..... ......ID 0,0-1280,800 #7f090217 app:id/nav_host_fragment&#125;time =1334 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.fragment.app.FragmentContainerView&#123;252346b2 V.E..... ......ID 0,0-1280,800 #7f090217 app:id/nav_host_fragment&#125;time =1334 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.appcompat.widget.ContentFrameLayout&#123;384e6e26 V.E..... ......ID 0,0-1280,800 #1020002 android:id/content&#125;time =1334 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =androidx.appcompat.widget.FitWindowsLinearLayout&#123;21c3908b V.E..... ......ID 0,0-1280,800 #7f090038 app:id/action_bar_root&#125;time =1334 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =android.widget.FrameLayout&#123;1311434e V.E..... ......ID 0,0-1280,800&#125;time =1334 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =android.widget.LinearLayout&#123;2ee80c50 V.E..... ......ID 0,0-1280,800&#125;time =1334 ms</span><br><span class="line">[ANR Warning]onMeasure time too long, this =com.android.internal.policy.impl.PhoneWindow$DecorView&#123;363775e4 V.E..... R.....ID 0,0-1280,800&#125;time =1334 ms</span><br></pre></td></tr></table></figure>
+
+<p>原理大概是<code>ConstraintLayout</code>下的<code>TextView</code>的<code>text</code>变动或者一些<code>View</code>的<code>visibility</code>属性变动会导致<code>ConstraintLayout</code>重新测量，导致<code>onMeasure</code>方法方法多次执行从而导致卡顿，解决方法也比较简单，就是数据变动涉及到的控件使用一个父布局做一层嵌套，这样个别控件的宽高变动不会导致整个布局重新测量，从而避免<code>onMeasure</code>方法的卡顿。<code>ConstraintLayout</code>的出现是为了减少嵌套而不是避免嵌套，在适当的场景下增加一层嵌套反而能提高页面加载的效率。</p>
+<p>当然这种增加嵌套的方式比较适合当前我这种<code>childView</code>众多的卡顿的场景，也有通过自定义<code>ConstraintLayout</code>中重写<code>onMeasure</code>方法来减少不必要的测量优化方式，还是要具体问题具体分析。</p>
+<h4 id="2-onLayout方法卡顿"><a href="#2-onLayout方法卡顿" class="headerlink" title="2. onLayout方法卡顿"></a>2. <code>onLayout</code>方法卡顿</h4><p>这个页面的场景是应用的主页，页面采用<code>TabLayout</code>+<code>ViewPager</code>+<code>Fragments</code>的结构，是一种比较典型的<code>TV</code>类布局结构，原型图大致如下：</p>
+<p><img src="/../images/home-page-prototype.png" alt="image"></p>
+<p>子<code>Fragment</code>里使用<code>RecyclerView</code>展示页面数据，部分页面加载中状态时使用<code>Fake</code>数据填充<code>RecyclerView</code>来达到预览的效果，由于<code>ViewPager</code>预加载的处理会导致页面打开时会有三个<code>Fragment</code>同时加载，这样的场景下<code>ViewPager</code>的<code>onLayout</code>方法就耗时比较严重，从而导致<code>onLayout</code>方法卡顿。当然也有一部分原因是我在<code>ViewHolder</code>里的<code>itemView</code>里使用了<code>ConstraintLayout</code>来做布局。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[ANR Warning]onLayout time too long, this =androidx.viewpager.widget.ViewPager&#123;30c079ac VFED.... ......ID 0,100-1024,600 #7f090364 app:id/vp_container&#125;time =441 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =androidx.constraintlayout.widget.ConstraintLayout&#123;10fd8623 V.E..... ......ID 0,0-1024,600&#125;time =442 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =androidx.fragment.app.FragmentContainerView&#123;2aeadbb3 V.E..... ......ID 0,0-1024,600 #7f09021a app:id/nav_host_fragment&#125;time =442 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =androidx.fragment.app.FragmentContainerView&#123;1a980a6f V.E..... ......ID 0,0-1024,600 #7f09021a app:id/nav_host_fragment&#125;time =443 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =androidx.appcompat.widget.ContentFrameLayout&#123;53f8013 V.E..... ......ID 0,0-1024,600 #1020002 android:id/content&#125;time =443 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =androidx.appcompat.widget.FitWindowsLinearLayout&#123;1c458be4 V.E..... ......ID 0,0-1024,600 #7f090038 app:id/action_bar_root&#125;time =443 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =android.widget.FrameLayout&#123;1b26438 V.E..... ......ID 0,0-1024,600&#125;time =443 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =android.widget.LinearLayout&#123;385d24aa V.E..... ......ID 0,0-1024,600&#125;time =443 ms</span><br><span class="line">[ANR Warning]onLayout time too long, this =com.android.internal.policy.impl.PhoneWindow$DecorView&#123;e93dc9e V.E..... R.....ID 0,0-1024,600&#125;time =443 ms</span><br></pre></td></tr></table></figure>
+
+<p>这个场景下的优化思路就比较明显了，主因是<code>ViewPager</code>下三个<code>Fragment</code>同时加载造成的同一时间需要<code>onLayout</code>的<code>View</code>太多，次因则实在<code>ViewHolder</code>中使用了<code>ConstraintLayout</code>，<code>Fragment</code>层面则是采用非当前显示的<code>Fragment</code>采用延迟加载的策略，<code>ViewHolder</code>层面则是替换掉<code>ConstraintLayout</code>的使用，使用<code>FrameLayout</code>、<code>LinearLayout</code>或<code>RelativeLayout</code>代替。</p>
+<blockquote>
+<p>之所以确定在<code>ViewHolder</code>中使用<code>ConstraintLayout</code>会造成<code>onLayout</code>耗时严重的问题，是因为在切换到仅使用一个图片来表示加载中的状态的页面时也会打印上述<code>ANR Warning</code>日志，替换成其它普通布局则没有问题。</p>
+</blockquote>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这次卡顿优化的过程再次验证了我在<code>Android高手开发课</code>中看到的关于性能优化的总结的一句话的含金量，就是<strong>性能优化的终点就是监控</strong>，性能的瓶颈在于如何被发现，就像我们日常解决<code>Bug</code>一样，只要有<code>Bug</code>的重现路径，解决<code>Bug</code>反而是其中比较简单的一环，对于我而言，在性能优化的道路上还有很长的一段路要走。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ConstraintLayout/" rel="tag"># ConstraintLayout</a>
+              <a href="/tags/%E5%B8%83%E5%B1%80%E4%BC%98%E5%8C%96/" rel="tag"># 布局优化</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/16/android-async-rxjava/" rel="prev" title="RxJava 实用案例">
+      <i class="fa fa-chevron-left"></i> RxJava 实用案例
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90%E5%8F%8A%E8%A7%A3%E5%86%B3"><span class="nav-number">2.</span> <span class="nav-text">问题分析及解决</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-onMeasure%E6%96%B9%E6%B3%95%E5%8D%A1%E9%A1%BF"><span class="nav-number">2.1.</span> <span class="nav-text">1. onMeasure方法卡顿</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-onLayout%E6%96%B9%E6%B3%95%E5%8D%A1%E9%A1%BF"><span class="nav-number">2.2.</span> <span class="nav-text">2. onLayout方法卡顿</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="szhangbiao"
+      src="/images/wechat_qrcode.jpg">
+  <p class="site-author-name" itemprop="name">szhangbiao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">51</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/szhangbiao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/szhangbiao" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;szhangbiao" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">szhangbiao</span>
+</div>
+
+
+  <script type="text/javascript" src='https://unpkg.com/browse/mermaid@11.4.1/dist/mermaid.min.js'></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'forest',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
